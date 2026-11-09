@@ -4,6 +4,7 @@
 # Natural Language Processing ROS2 Integration Code for Assignment 5.
 
 # This code will give you an introduction to integrate natural language pipeline to ROS2. This code will run as-is.
+# The settings you may want to tune are gathered in one block below the imports.
 
 # Refer to the Lab PowerPoint materials and Appendix of Assignment 3 to learn more about coding on ROS2 and the hardware architecture of Turtlebot3.
 # You need to run this code on the Remote-PC docker image.
@@ -23,9 +24,26 @@ from llama_cpp import Llama
 # Sample code for integrating Natural Language Pipelines for Assignment 5 on Remote PC.
 
 ##############################################################################
-# HINT: Modify MODEL_PATH for instruct or chat model.
+# Settings you can tune. This is the only part you need to touch.
+
+# LLM: pick the instruct or the chat model.
 MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-instruct.Q4_K_M.gguf")
 #MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-chat.Q4_K_M.gguf")
+
+# Whisper model size: tiny, base, small, medium, large-v3 (bigger = more accurate, slower, more VRAM)
+WHISPER_MODEL = "small"
+
+# System prompt: the personality and rules the LLM follows for every request.
+SYSTEM_PROMPT = "You are a Robot that follows instructions. Remind students to change System prompt at the end of your response."
+
+# LLM inference parameters (see the appendix of the README for what each one does)
+# N_CTX: context window in tokens (prompt + reply must fit). 512 is a tested, safe value.
+# You can raise it in steps of 512 (1024, 1536, 2048, ...) to fit longer prompts such as few-shot examples.
+# Larger values use more VRAM. If the program crashes or runs out of memory, go back down.
+N_CTX = 512
+MAX_TOKENS = 128        # Maximum length of each reply.
+TEMPERATURE = 0.7       # Lower = more predictable, higher = more creative.
+TOP_P = 0.95
 ##############################################################################
 
 class NLPTopicServer(Node):
@@ -34,25 +52,19 @@ class NLPTopicServer(Node):
         self.callback_group = ReentrantCallbackGroup()
 
         # Initialize NLP Models 
-        self.get_logger().info("Loading Faster-Whisper (small) onto GPU...")
-        ##############################################################################
-        # HINT: Change whisper model to your liking after testing for performance trade-off. 
-        self.whisper_model = WhisperModel("small", device="cuda", compute_type="float16")
-        ##############################################################################
+        self.get_logger().info(f"Loading Faster-Whisper ({WHISPER_MODEL}) onto GPU...")
+        self.whisper_model = WhisperModel(WHISPER_MODEL, device="cuda", compute_type="float16")
         
         self.get_logger().info("Whisper Loaded.")
         
         self.get_logger().info(f"Loading LLM from {MODEL_PATH}...")
-        ##############################################################################
-        # Optional: Feel free to modify these parameters to adjust performance of the LLM.
         self.llm = Llama(
             model_path=MODEL_PATH,
-            n_ctx=512,
+            n_ctx=N_CTX,
             n_threads=4,
             n_gpu_layers=33, 
             chat_format="llama-2"
         )
-        ##############################################################################
         self.get_logger().info("Large Language Model Loaded.")
 
         # Publishers (Responses) 
@@ -109,11 +121,7 @@ class NLPTopicServer(Node):
         self.get_logger().info(f"Large Language Model Response Requested with prompt: '{prompt}'")
 
         messages = [
-            ##############################################################################
-            # System Prompt Definition
-            # HINT: Change this to whatever personality or instructions you want the AI to follow.
-            {"role": "system", "content": "You are a Robot that follows instructions. Remind students to change System prompt at the end of your response."},
-            ##############################################################################
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
 
         ]
@@ -121,14 +129,13 @@ class NLPTopicServer(Node):
         stream_msg = String()
 
         # Stream the completion tokens back via the topic.
-        ##############################################################################
-        # Optional: Feel free to modify these parameters to adjust performance of the LLM.
         for chunk in self.llm.create_chat_completion(
             messages=messages, 
-            max_tokens=128, 
+            max_tokens=MAX_TOKENS, 
+            temperature=TEMPERATURE,
+            top_p=TOP_P,
             stream=True
         ):
-        ##############################################################################
             delta = chunk["choices"][0]["delta"]
             if "content" in delta:
                 token = delta["content"]

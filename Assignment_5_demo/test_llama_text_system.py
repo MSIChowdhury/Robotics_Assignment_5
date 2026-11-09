@@ -31,7 +31,7 @@ def main():
         model_path=MODEL_PATH,
         # Note for Advanced Users: You can modify chat_format to add native support to various special formatting such as [INST] or <<SYS>>
         chat_format="llama-2", 
-        n_ctx=512,
+        n_ctx=512,   # Tested value. Try raising it in steps of 512 (see README); lower it if memory runs out.
         n_threads=4,
         n_gpu_layers=33,
         seed=420,
@@ -82,7 +82,7 @@ def main():
                 print(token, end="", flush=True)
         
         if full_reply:
-            messages.append({"role": "assistant: ", "content": full_reply})
+            messages.append({"role": "assistant", "content": full_reply})
         
         print()
 

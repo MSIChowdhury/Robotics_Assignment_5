@@ -35,9 +35,14 @@ class NLPClient(Node):
         self.stt_done = threading.Event()
         self.llm_done = threading.Event()
 
+        # Latest server results, used by option 4
+        self.stt_text = ""
+        self.llm_text = ""
+
     # Callbacks (Handling Server Responses)
     def stt_callback(self, msg):
         print(f"\nSpeech To Text Result : {msg.data}")
+        self.stt_text = msg.data
         self.stt_done.set() # Unblock the menu
 
     def llm_callback(self, msg):
@@ -46,6 +51,7 @@ class NLPClient(Node):
             self.llm_done.set() # Unblock the menu
         else:
             # Stream tokens directly to terminal without newlines
+            self.llm_text += msg.data
             sys.stdout.write(msg.data)
             sys.stdout.flush()
 
@@ -63,7 +69,7 @@ class NLPClient(Node):
             print("5. Exit")
             print("="*40)
             
-            choice = input("Select an option (1-4): ")
+            choice = input("Select an option (1-5): ")
             
             if choice == '1':
                 text = input("Enter text to speak: ")
@@ -88,6 +94,7 @@ class NLPClient(Node):
                 prompt = input("Enter your prompt for the Large Language Model: ")
                 msg = String()
                 msg.data = prompt
+                self.llm_text = ""
                 self.llm_done.clear()
                 self.llm_pub.publish(msg)
                 
@@ -95,10 +102,44 @@ class NLPClient(Node):
                 self.llm_done.wait() # Pause menu until server sends [DONE]
                 
             elif choice == '4':
-            ##############################################################################
-            # HINT: Complete this section that integrates 1 to 3 so that you can have voice conversations with LLM.
-                print("Not Implemented. Please Implement as a requirement for Assignment 5.")
-            ############################################################################## 
+                # Full pipeline: speak -> Whisper (STT) -> LLaMa (LLM) -> eSpeak (TTS)
+                try:
+                    dur = int(input("Enter recording duration (seconds) [e.g. 5]: "))
+                except ValueError:
+                    print("Please enter a valid number.")
+                    continue
+
+                # 1. Ask the server to record and transcribe our voice
+                self.stt_done.clear()
+                stt_msg = Int32()
+                stt_msg.data = dur
+                self.stt_pub.publish(stt_msg)
+                print(f"Server on Remote-PC is recording for {dur} seconds. Speak now.")
+                if not self.stt_done.wait(timeout=dur + 60):
+                    print("Timed out waiting for Speech To Text.")
+                    continue
+                if not self.stt_text:
+                    print("Nothing was heard. Please try again.")
+                    continue
+
+                # 2. Send the transcribed text to the LLM and collect the streamed reply
+                self.llm_text = ""
+                self.llm_done.clear()
+                llm_msg = String()
+                llm_msg.data = self.stt_text
+                self.llm_pub.publish(llm_msg)
+                print("Large Language Model: ", end="", flush=True)
+                if not self.llm_done.wait(timeout=120):
+                    print("Timed out waiting for the Large Language Model.")
+                    continue
+
+                # 3. Have eSpeak read the reply out loud
+                reply = self.llm_text.strip()
+                if reply:
+                    tts_msg = String()
+                    tts_msg.data = reply
+                    self.tts_pub.publish(tts_msg)
+                    print("Reply sent to eSpeak. Listen for the audio.")
             elif choice == '5':
                 print("Exiting...")
                 return

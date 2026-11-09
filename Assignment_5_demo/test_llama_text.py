@@ -28,7 +28,7 @@ def main():
     # Optional: Feel free to modify these parameters to adjust performance of the LLM.
     llm = Llama(
         model_path=MODEL_PATH,
-        n_ctx=512,
+        n_ctx=512,   # Tested value. Try raising it in steps of 512 (see README); lower it if memory runs out.
         n_threads=4,
         n_gpu_layers=33,
         seed=420,

@@ -1,6 +1,6 @@
 # 2026 CS 4379K / CS 5342 Introduction to Autonomous Robotics, Robotics and Autonomous Systems
 
-## Programming Assignment: Milestone 5 (V1.15)
+## Programming Assignment: Milestone 5 (V1.2)
 
 **Minhyuk Park and Tsz-Chiu Au**
 
@@ -54,10 +54,26 @@ Rules for robot usage will apply for working with the physical Turtlebot3. Pleas
 
 ### Major Changes
 
+* **v 1.2:** Client option 4 is now provided complete, so no coding is required. Server settings are gathered in one block. Fixed model filename typos and demo bugs. Clone URL updated.
 * **v 1.15:** Submission of source code was changed to optional as part of the request from the instructor.
 * **v 1.1:** Changes to Prompting content.
 * **v 1.05:** Major overhaul involving a lot of requested changes.
 * **v 1.0:** Initial Public Release
+
+---
+
+### Quick Start: Your Checklist
+
+You do not need to write any code in this assignment. All code is provided; you run it, change a few settings or prompts, and observe what happens. Follow the parts in order and tick them off as you record your video.
+
+- [ ] **Part 1:** Download the demo files and the two LLaMa models.
+- [ ] **Part 2:** Run `test_whisper.py` (Whisper + eSpeak). Try a different Whisper model size.
+- [ ] **Part 3:** Run `test_llama_text.py` and `test_llama_text_system.py` with both the instruct and the chat model. Try the prompts in this section (zero-shot, few-shot, chain-of-thought) and write down what happens. Then run `test_llama_whisper_and_speach.py`. (Demo Part A)
+- [ ] **Part 4:** Start `sample_code_servers.py`, then `sample_code_clients.py` in a second Docker shell. Try menu options 1 to 3, then option 4 for the full voice conversation. Tune the server settings in the table. (Demo Parts B and C)
+
+Keep `top` and `nvidia-smi` open in a spare terminal so you notice if you run out of memory.
+
+Nothing from your Assignment 3 code is needed for this assignment; it does not move the robot.
 
 ---
 
@@ -71,7 +87,7 @@ Be prepared to wait for a while to download the LLM model.
 
 ```bash
 cd ~/turtlebot_docker/my_code
-git clone https://github.com/dmz44/Robotics_Assignment_5.git
+git clone https://github.com/MSIChowdhury/Robotics_Assignment_5.git
 cd ~/turtlebot_docker/my_code/Robotics_Assignment_5/Assignment_5_demo
 wget -c https://huggingface.co/TheBloke/Llama-2-7B-32K-Instruct-GGUF/resolve/main/llama-2-7b-32k-instruct.Q4_K_M.gguf
 wget -c https://huggingface.co/TheBloke/Llama-2-7b-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
@@ -90,7 +106,6 @@ To quote OpenAI, Whisper is a general-purpose speech recognition model. It is tr
 This assumes that you have a working setup from Milestone Assignment 1 Part 1. Please execute all instructions with **[Remote PC]** on the Docker shell. Note that you have to enable the GUI and start the Docker container by following instruction from Milestone Assignment 1. Please execute all instructions with **[Turtlebot Nvidia Jetson]** on Turtlebot Jetson's native bash shell without Docker.
 
 The following instructions are from our own and not from online sources. Please follow carefully and ask the TA for assistance should you face any problems.
-``
 
 **[Remote-PC]** Inside a new Docker shell, you can monitor the system resources on the Remote-PC with the following commands running in the background.
 
@@ -248,12 +263,12 @@ cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
 
 ```
 
-**[Remote-PC]** Try running llama-2-7b-32k-insturct via Q4 quantization on a new Docker shell. 
+**[Remote-PC]** Try running llama-2-7b-32k-instruct via Q4 quantization on a new Docker shell. 
 
 Be prepared to wait for a while to load the LLM model into VRAM during the first run.
 
 ```python
-MODEL_PATH = os.path.expanduser(“~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-insturct.Q4_K_M.gguf”)
+MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-instruct.Q4_K_M.gguf")
 
 ```
 
@@ -265,7 +280,7 @@ python3 test_llama_text.py
 **[Remote-PC]** Close the previous program with ctrl + c on the terminal. Modify the demo code so that you can chat with a llama via text, but with llama2-7b-chat and re-execute the demo.
 
 ```python
-MODEL_PATH = os.path.expanduser(“~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-chat.Q4_K_M.gguf”)
+MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-chat.Q4_K_M.gguf")
 
 ```
 
@@ -373,7 +388,7 @@ For part 4, we will provide you with the complete ROS2 server script and ROS2 cl
 
 Please take a look at the provided code for ROS2 Servers and clients, and choose what models you want to use for Whisper and LLaMa by modifying the provided code. 
 
-You need to complete option 4 in the sample_client script. It is expected that the script will take in your voice as input after a few seconds of recording(e.g. 5 seconds) and read the LLM response to you using espeak.
+Option 4 of the sample client is already implemented, so no coding is required. It records your voice for a few seconds (e.g. 5 seconds), transcribes it with Whisper, sends the text to LLaMa, and reads the LLM response to you using espeak.
 
 The following is an instruction to execute the provided code. 
 
@@ -394,9 +409,28 @@ cd ~/my_code/Robotics_Assignment_5/
 python3 sample_code_clients.py
 ```
 
-**[Remote-PC]** While the codes run as is, you are still expected to modify the parameters within the code if necessary to complete the demo requirements.
+**[Remote-PC]** In the client menu, try options 1, 2 and 3 first (eSpeak, Whisper, LLaMa one at a time), then option 4, which chains all three.
 
-**[Remote-PC]** Complete code for client option 4 that integrates three interfaces discussed in the client code.
+**[Remote-PC]** The settings you may want to tune are gathered in one block at the top of `sample_code_servers.py`. Change one value at a time, restart the server, and compare the result. Use `nvidia-smi` to watch VRAM.
+
+| Setting | Values to try | What to observe |
+| --- | --- | --- |
+| `MODEL_PATH` | `llama-2-7b-32k-instruct...` vs `llama-2-7b-chat...` | How well each follows strict output instructions |
+| `WHISPER_MODEL` | `tiny`, `base`, `small`, `medium` | Transcription accuracy vs. delay and VRAM |
+| `SYSTEM_PROMPT` | The robot action planning prompt from Part 3, with and without a system prompt | Whether the reply stays in the format you asked for |
+| `TEMPERATURE`, `TOP_P` | `0.1` vs `0.7` vs `1.0` | How random or repeatable the replies are |
+| `MAX_TOKENS` | `32`, `128`, `256` | Length of reply, and whether it gets cut off |
+| `N_CTX` | `512` (tested default), then `1024`, `1536`, `2048` (see the experiment below) | Whether longer prompts fit, VRAM use, and whether it crashes |
+
+
+**Experiment: how big can the context window be?** `N_CTX` (and `n_ctx` in the `test_llama_*` demos) is set to `512`, a value we have tested. It limits how many tokens the prompt and the reply can use together. Long prompts, such as few-shot or chain-of-thought examples, may not fit in 512 tokens and can fail with an error saying the prompt exceeds the context window. You can raise it to test whether the LLM works better:
+
+1. Raise `N_CTX` in steps of 512: `512`, `1024`, `1536`, `2048`, and so on. (As a rough guide, each extra 512 tokens uses about 0.25 GB more VRAM for a 7B model.)
+2. Restart the server (or the demo script) each time and watch `nvidia-smi` and `top` while the model loads and while it answers.
+3. Re-run the same prompt, for example the few-shot robot action planning prompt, and compare the answers.
+4. If the program crashes, hangs, or reports out of memory, the value is too high for this laptop. Go back to the last value that worked and write it down.
+
+The chat model supports at most 4096 tokens. The instruct model supports far more, but your 8 GB of VRAM will run out much sooner.
 
 ---
 
@@ -430,12 +464,12 @@ The goal of this part is to explain the ROS2 architecture we provided. With your
 
 **Remote PC Client:**
 * Explain the client architecture on how it interfaces with the publisher servers mentioned above.
-* Explain how you integrated the three to have a conversation with LLM to implement option 4. 
+* Explain how option 4 of the client chains the three servers together to have a conversation with the LLM.
 
 
 #### Part C: Live System Demonstration
 
-In this part, you will run our full system to demonstrate each AI model and the ROS2 communication between them, and modify the client to demonstrate you understand how to use the provided ROS2 server for the Natural Language Pipeline.
+In this part, you will run our full system to demonstrate each AI model and the ROS2 communication between them, and tune the server settings to demonstrate you understand how to use the provided ROS2 server for the Natural Language Pipeline.
 
 **Whisper (Speech-to-Text):**
 * Speak a clear English sentence into the microphone (e.g., "Hello, what can you tell me about robotics?").
@@ -448,7 +482,7 @@ In this part, you will run our full system to demonstrate each AI model and the 
 **espeak (Text-to-Speech):**
 * Take the text response generated by LLaMa and use your Remote PC client to send it as a goal to the Espeak publisher server.
 
-**Full Integration (Complete sample_code_clients.py option 4 by referring to interactive menu option 1 to 3)**
+**Full Integration (Run option 4 of sample_code_clients.py, which chains interactive menu options 1 to 3)**
 You can refer to the demo code **test_llama_whisper_and_speach.py** for the expected behavior when thee are fully integrated.
 The following steps should require no keyboard input from the user.
 
@@ -831,7 +865,7 @@ Smaller model size is crucial for running on edge devices, which only has 8GB of
 
 Let us now talk about the quantization ecosystem relevant to users when they want to download a model from Hugging Face. The following shows a GGUf file from HuggingFace that was used as a demo in this assignment.
 
-`llama-2-7b-32k-insturct.Q4_K_M.gguf`
+`llama-2-7b-32k-instruct.Q4_K_M.gguf`
 
 From the name of the model, aside from the fact that this is an LlaMa2 model with 7b parameters, we can actually see the type of quantization technique used before distribution on Hugging Face.
 
@@ -843,7 +877,7 @@ All in all, Q4_K_M is generally the recommended 4-bit quantization for most user
 **Context Window and Finetuning Methods for LLMs**
 
 So far, the discussion on llama.cpp and quantization has been concerned with how to run aspects of LLMs. This information might be enough for you to start running LLMs on edge devices without crashing. However, you should now shift your focus to finding a suitable model for you to achieve your goals of running LLMs on the edge.
-You might have noticed that sometimes there is a smaller number like 32k listed after a big number, such as 7b, in some LLM models on Hugging Face. For file name `llama-2-7b-32k-insturct.Q4_K_M.gguf`, 32k refers to the token count of the context window. This is the model's memory, equivalent to about 24000 English words with about 3-4 English characters per token. This means the model can read, process, and remember a prompt and its ongoing conversation up to the length of 32k tokens. This is a very large context window. The original Llama 2 model was only 4,000 tokens (4k). A 32k model is specifically designed for tasks involving long documents. You can paste in an entire chapter, a long research paper, or a big block of code, and ask complicated questions with many logical steps, which a 4k model could not handle.
+You might have noticed that sometimes there is a smaller number like 32k listed after a big number, such as 7b, in some LLM models on Hugging Face. For file name `llama-2-7b-32k-instruct.Q4_K_M.gguf`, 32k refers to the token count of the context window. This is the model's memory, equivalent to about 24000 English words with about 3-4 English characters per token. This means the model can read, process, and remember a prompt and its ongoing conversation up to the length of 32k tokens. This is a very large context window. The original Llama 2 model was only 4,000 tokens (4k). A 32k model is specifically designed for tasks involving long documents. You can paste in an entire chapter, a long research paper, or a big block of code, and ask complicated questions with many logical steps, which a 4k model could not handle.
 
 Another factor that influences decisions regarding LLM is the fine-tuning process. Base LLMs are trained to predict words within a context. In the case of LlaMa2, it was trained on a massive portion of the internet. It's a "next-word predictor." If you give it the prompt "What is the capital of France?", it might just complete it with "...and what is its population?" because that's a statistically likely sentence. As such, base LLMs are not very useful for scientific and engineering applications such as robotics.
 
