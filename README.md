@@ -1,367 +1,284 @@
-# 2026 CS 4379K / CS 5342 Introduction to Autonomous Robotics, Robotics and Autonomous Systems
+# CS7389K Advanced Robotics and Autonomous Systems
 
-## Programming Assignment: Milestone 5 (V1.2)
+## Milestone 5: Talking to Your Robot (Voice and Language Models)
 
-**Minhyuk Park and Tsz-Chiu Au**
+**Author:** MD Sameer Iqbal Chowdhury
 
-### Introduction
+## What is this assignment?
 
-In this fifth milestone, you will learn how to use a voice recognition neural network, Whisper, and Text to Speech system, Espeak, and run LlaMa Large Language Model by Meta on Remote-PC.
+You will make a computer **listen** to your voice, **think** about what you said, and **talk** back. You do not need to write any code. You will run programs, change a few settings, and watch what happens.
 
-To do this, you will deploy our pre-configured Docker container that sets up all the software that is required for the assignment.
-Please refer to the following video for an explanation of what a Docker container environment is. 
+| Tool | What it does |
+| --- | --- |
+| **Whisper** | Turns your voice into text |
+| **LLaMa** | A language model. It reads text and writes an answer |
+| **eSpeak** | Reads text out loud |
 
-[https://www.youtube.com/watch?v=Gjnup-PuquQ](https://www.youtube.com/watch?v=Gjnup-PuquQ)
+**How to use this page:** do the steps in order, one at a time. Each step tells you what to do, what you should see, and what you learn. Compare your screen with the "You should see" box. Small differences (numbers, timestamps, the exact words from the AI) are normal.
 
-Robot Operating System version is associated with Ubuntu Long-Term Support Versions (e.g. Ubuntu 22.04 with Humble). We are using **ROS 2 Humble in a Docker environment** for Remote-PC. You might find the official tutorial on ROS 2 Humble useful in this course:
+**What you hand in:** 3 short video clips, uploaded to YouTube (Unlisted), with the 3 links pasted into Canvas. The full checklist is in the last step.
 
-[https://docs.ros.org/en/humble/Tutorials.html](https://docs.ros.org/en/humble/Tutorials.html)
-
-For all questions regarding milestone assignments and the robot, **you should contact the Doctoral Instructor Assistant via direct message on Slack**. Please do not contact the Instructor with questions regarding the milestone assignments. This is the URL for Slack for this course. 
-
-<https://spring2026txstrobot.slack.com/>
-
-For those of you who are not familiar with LLMs, here is a brief introduction. 
-<https://mark-riedl.medium.com/a-very-gentle-introduction-to-large-language-models-without-the-hype-5f67941fa59e>
-
-Here is an introduction to Whisper.
-[https://openai.com/index/whisper/](https://openai.com/index/whisper/)
-
-Here is an introduction to LLaMa Large Language Model.
-[https://www.llama.com/llama2/](https://www.llama.com/llama2/)
-
-### Assignment requirement
-
-A hardware video demonstration submission is required for Milestone Assignment 5. 
-
-You need to demonstrate that you can utilize various natural language pipelines for your needs. Refer to the demo requirement section at the end of the milestone assignment on what to include in the video.
-
-**[SUBMISSION RULES]**
-
-* **Individual Submission:** **Every team member must submit the video link(s) separately to Canvas.** If the video is duplicated within a team, that is acceptable; however, this ensures that only active participants who have access to the team’s recordings can receive credit. 
-
-* **Standardized Hosting:** **To manage file sizes, do not upload raw video files (e.g., MP4) directly to Canvas.** Instead, **upload your videos to YouTube (set as "Unlisted")** and submit the links via a document.
-
-### Video Demo Requirements
-
-Your group will **record** one or more video clips. The estimated total length of the video clips is approximately four and a half minutes. **While you do not need to perform complex editing, please keep the total duration to a few minutes to ensure it remains concise.** One group member should narrate the video, explaining each step as it's performed. At the beginning of the first video clip, please show every group member's face and state the names of all group members.
-
-Your recording setup should be organized to show all relevant windows at once: the terminal(s) used for launching nodes, the Gazebo simulation window, and the RViz visualization window.
-
-You do not need to edit the videos, and uploading raw **footage** will suffice. You can split the demonstration into multiple videos **if necessary to show different parts of the requirement.** 
-
-Rules for robot usage will apply for working with the physical Turtlebot3. Please refer to the inventory list given to you separately and the rules for the Robot room usage.
-
-### Major Changes
-
-* **v 1.2:** Client option 4 is now provided complete, so no coding is required. Server settings are gathered in one block. Fixed model filename typos and demo bugs. Clone URL updated.
-* **v 1.15:** Submission of source code was changed to optional as part of the request from the instructor.
-* **v 1.1:** Changes to Prompting content.
-* **v 1.05:** Major overhaul involving a lot of requested changes.
-* **v 1.0:** Initial Public Release
+Questions? Send a direct message to the Doctoral Instructor Assistant on Slack. Please do not email the instructor about the milestones.
 
 ---
 
-### Quick Start: Your Checklist
+## Step 1 (Optional): Watch a video about Docker
 
-You do not need to write any code in this assignment. All code is provided; you run it, change a few settings or prompts, and observe what happens. Follow the parts in order and tick them off as you record your video.
+**Watch (optional):** <https://www.youtube.com/watch?v=Gjnup-PuquQ>
 
-- [ ] **Part 1:** Download the demo files and the two LLaMa models.
-- [ ] **Part 2:** Run `test_whisper.py` (Whisper + eSpeak). Try a different Whisper model size.
-- [ ] **Part 3:** Run `test_llama_text.py` and `test_llama_text_system.py` with both the instruct and the chat model. Try the prompts in this section (zero-shot, few-shot, chain-of-thought) and write down what happens. Then run `test_llama_whisper_and_speach.py`. (Demo Part A)
-- [ ] **Part 4:** Start `sample_code_servers.py`, then `sample_code_clients.py` in a second Docker shell. Try menu options 1 to 3, then option 4 for the full voice conversation. Tune the server settings in the table. (Demo Parts B and C)
+You already did this in Assignment 1, so skip it if you remember what Docker is.
 
-Keep `top` and `nvidia-smi` open in a spare terminal so you notice if you run out of memory.
-
-Nothing from your Assignment 3 code is needed for this assignment; it does not move the robot.
+**What you learn:** A Docker container is like a small, separate computer running inside your laptop. All the robot software lives inside it, so you will type most commands *inside* the container.
 
 ---
 
-### Part 1: Downloading the Demo Files
+## Step 2: Start the container
 
-Execute this instruction on the native shell of the remote-pc. 
+**Do:** Open a normal terminal on the laptop and run these commands. (You did this in Assignment 1. If the container is already running, skip to the last command.)
 
-**[Native Bash Shell Remote-PC]** While connected to the internet, git clone and download the demo in my_code folder of the Docker's shared folder. 
+```bash
+xhost +local:root
+cd ~/turtlebot_docker
+HOST_UID=$(id -u) USER_HOME=$HOME docker compose up -d
+docker exec -it remote_pc_humble bash
+```
 
-Be prepared to wait for a while to download the LLM model.
+**You should see:** the last line changes your prompt to start with `root@`.
+
+```text
+root@your-laptop-name:~#
+```
+
+**What you learn:** The `root@` prompt means you are now *inside* the container. If you ever see your normal username instead, you are outside. Run the last command again. This is the same container you built in Assignment 1. It already has Whisper, LLaMa (`llama-cpp-python`) and eSpeak installed, so there is nothing to install for this assignment.
+
+---
+
+## Step 3: Download the assignment files
+
+**Do:** Open a **new normal terminal** (not inside the container). Download the code and the two LLaMa model files. The programs are already in your container, but the model files are not in any of the earlier repos (they are about 4 GB each), so you must download them. Whisper needs no download now: it fetches its own model the first time you use it (Step 6).
 
 ```bash
 cd ~/turtlebot_docker/my_code
 git clone https://github.com/MSIChowdhury/Robotics_Assignment_5.git
-cd ~/turtlebot_docker/my_code/Robotics_Assignment_5/Assignment_5_demo
+cd Robotics_Assignment_5/Assignment_5_demo
 wget -c https://huggingface.co/TheBloke/Llama-2-7B-32K-Instruct-GGUF/resolve/main/llama-2-7b-32k-instruct.Q4_K_M.gguf
 wget -c https://huggingface.co/TheBloke/Llama-2-7b-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
 ```
 
-### Part 2: Running Whisper Voice Transcription Software and Espeak Text to Speech
+**You should see:** a progress bar for each download.
 
-#### Running Whisper and Espeak
-
-Part 2 will show you how to run Whisper and Espeak. The demo codes allow you to understand and fine-tune Whisper and Espeak parameters without ROS2 components influencing the program.
-
-To quote the eSpeak developers, eSpeak is a compact open source software speech synthesizer for English and other languages, for Linux and Windows.
-
-To quote OpenAI, Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. This assignment uses faster-whisper, an optimized, high-performance re-implementation of OpenAI's Whisper speech-to-text model using CTranslate2.
-
-This assumes that you have a working setup from Milestone Assignment 1 Part 1. Please execute all instructions with **[Remote PC]** on the Docker shell. Note that you have to enable the GUI and start the Docker container by following instruction from Milestone Assignment 1. Please execute all instructions with **[Turtlebot Nvidia Jetson]** on Turtlebot Jetson's native bash shell without Docker.
-
-The following instructions are from our own and not from online sources. Please follow carefully and ask the TA for assistance should you face any problems.
-
-**[Remote-PC]** Inside a new Docker shell, you can monitor the system resources on the Remote-PC with the following commands running in the background.
-
-**CPU and RAM Usage**
-```
-top
+```text
+Cloning into 'Robotics_Assignment_5'...
+...
+llama-2-7b-32k-instruct.Q4_K_M.gguf   100%[===================>]   3.8G  25.1MB/s    in 2m 30s
+llama-2-7b-chat.Q4_K_M.gguf           100%[===================>]   3.8G  24.8MB/s    in 2m 32s
 ```
 
-**Example output of top: Monitor %CPU and %MEM so that you do not run out of system resources**
-```
-top - 20:23:44 up  8:52,  0 users,  load average: 1.73, 1.83, 1.79
-Tasks:   5 total,   1 running,   4 sleeping,   0 stopped,   0 zombie
-%Cpu(s):  8.3 us,  0.3 sy,  0.0 ni, 91.1 id,  0.0 wa,  0.0 hi,  0.2 si,  0.0 st
-MiB Mem :  15289.4 total,    503.6 free,   5193.6 used,   9592.2 buff/cache
-MiB Swap:   4096.0 total,   4095.6 free,      0.4 used.  10573.3 avail Mem 
-
-    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND                                                                                                          
-      1 root      20   0    8096   4448   3648 S   0.0   0.0   0:00.04 bash                                                                                                             
-     98 root      20   0    8224   4496   3676 S   0.0   0.0   0:00.01 bash                                                                                                             
-    131 root      20   0    8224   4548   3728 S   0.0   0.0   0:00.04 bash                                                                                                             
-    953 root      20   0   33.8g 619396 285848 S   0.0   4.0   0:02.88 python3                                                                                                          
-    981 root      20   0   10844   4196   3468 R   0.0   0.0   0:00.00 top
-```
-
-**GPU Usage (GPU memory or VRAM, GPU utilization)**
-```
-nvidia-smi
-```
-
-**Example output of nvidia-smi: Monitor GPU-Util and GPU Memory Usage(VRAM Usage) so that you do not run out of system resources**
-```
-root@minhyuk-Nitro-ANV16-42:~/my_code/Robotics_Assignment_5# nvidia-smi
-Tue Mar 31 20:24:26 2026       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
-+-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce RTX 5050 ...    Off |   00000000:01:00.0 Off |                  N/A |
-| N/A   42C    P8              3W /   60W |    4893MiB /   8151MiB |      0%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|    0   N/A  N/A             953      C   python3                                4870MiB |
-+-----------------------------------------------------------------------------------------+
-
-```
-
-**[Remote-PC]** Inside a new Docker shell, go to the folder in a new terminal window.
+Check that both files are there:
 
 ```bash
-cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
-
+ls
 ```
 
-**[Remote-PC]** Run the demo code within the Dockershell that incorporates Espeak  and whisper. You would be able to speak for 5 seconds, and whatever gets transcribed would be echoed(spoken) by Espeak. Note that Whisper is capable of transcribing non-English sentences, unless specified as English-only in the next step. 
-
-Be prepared to wait for a while to download the whisper model during your first run.
-
-```bash
-python3 test_whisper.py
-
+```text
+llama-2-7b-32k-instruct.Q4_K_M.gguf   test_llama_text.py          test_llama_whisper_and_speach.py
+llama-2-7b-chat.Q4_K_M.gguf           test_llama_text_system.py   test_whisper.py
 ```
 
-**[Optional] [Remote-PC]** Run the demo code for different-sized models. You can modify the following line to change the model.
-
-```python
-whisper_model = WhisperModel("small", device = "cuda", compute_type = "float16")
-
-```
-
-The available models are listed in order from smallest to largest: tiny, base, small, medium, and large v1/v2/v3. Note that all models, except large, have English-only versions.
-
-Note that Remote-PC has 8GB of dedicated VRAM. It is your responsibility to keep VRAM usage in check so that your program do not crash from out of memory errors. We have given reasonable defaults in the demo programs we provided.
-
-| Model | Param count | Vram Usage |
-| --- | --- | --- |
-| tiny / tiny.en | 39 M | ~0.15 GB |
-| base / base.en | 74 M | ~0.2 GB |
-| small / small.en | 244 M | ~0.6 GB |
-| medium / medium.en | 769 M | ~1.5 GB |
-| large (v1/v2/v3) | 1550 M | ~3.1 GB |
-
+**What you learn:** AI models are just big files. These two are about 4 GB each.
 
 ---
 
-### Part 3: Running LLaMa Large Language Model on Remote-PC
+## Step 4: Open two monitor windows
 
-Part 3 will show you how to run LLaMa, a Large Language Model from Meta.
+**Do:** Open two new terminals, enter the container in each (`docker exec -it remote_pc_humble bash`), and run one command in each. Leave them open for the rest of the assignment.
 
-A Large Language Model (LLM) is an advanced type of artificial intelligence (AI) designed to understand, generate, and process human language. At their core, LLMs are Artificial Intelligence models trained to do one simple thing very well: predict the next word. The key technology that makes this possible is the Transformer architecture, which uses a mechanism called self-attention. This allows the model to "pay attention" to different words in a sentence, no matter how far apart they are, to understand the full context. Because they are trained on such diverse data, LLMs are incredibly versatile and can be adapted for many tasks.
-
-This assignment uses the LlaMa2 model. To quote Meta, LlaMa 2 is an open-source, free large language model for research and commercial use, trained on 2 trillion tokens with double the context length of Llama 1. This assignment will explore two specialized LlaMa2 models, chat and instruct. Please refer to the appendix for a detailed explanation of finetuning methods involved in chat and instruct.
-
-The following instructions are from our own and not from online sources. Please follow carefully and ask IA for assistance should you face any problems.
-
-#### Prompt Engineering and Design
-
-**[Recommend Reading]** Prompting guide and techniques
-[https://www.promptingguide.ai/techniques](https://www.promptingguide.ai/techniques)
-
-LLMs can be applied to robotics by having LLMs act as the "brain" or "reasoning engine" for robots, bridging the gap between high-level human goals and the low-level physical actions a robot must perform. By constraining and mapping the natural language output using some control code, it can even be executed by a physical robot as well. This approach is a major shift away from traditional robotics, which relies on engineers to manually pre-program every possible action and scenario. With an LLM, a robot can understand general, ambiguous commands and create its own step-by-step plans to achieve them.
-
-However, to do this, you need to give the correct prompt in a process called prompt engineering to guide the LLMs. In robotics, a "prompt" isn't just the user's command. It's a complex, continuously updated text block that gives the LLM all the context it needs to make a single, correct decision. Think of it as the operating system's instruction sheet for the LLM "brain."
-
-The prompts need to do the following:
-
-* Defining the Robot's "Personality" and Rules as pre-prompt (System Prompt).
-* Providing Real-World Context (Grounding)
-* Guiding the Reasoning Process (Task Planning)
-* Constraining the Output (Ensuring Safety)
-
-What would happen if you did not structure your prompt? Let's say you ask the LLM agent how to satisfy your thirst using a turtlebot with a manipulator arm. You ask the agent directly as follows: “ I am thirsty, help me “. The LLM does not know what kind of resources it has, so it will do a conversational or nonsensical output, such as “Of course, staying hydrated is very important”. Ideally, you want a physically possible, logical action sequence as a plan that caters to your robot agent and the environment, kind of like how you compile source code into a machine executable.
-
-The more detailed description of the prompt engineering process is left as recommended reading in the appendix.
-
-#### Running LLaMa
-
-Here is a table of LLaMa LLM features. For more details of each model, please consult the appendix.
-
-| Feature | `llama-2-7b-32k-instruct.Q4_K_M.gguf` | `llama-2-7b-chat.Q4_K_M.gguf` |
-| :--- | :--- | :--- |
-| **Base Architecture** | LLaMA-2 | LLaMA-2 |
-| **Parameter Count** | 7 Billion | 7 Billion |
-| **Context Window (Max Tokens)**| **32,768 (32k)** | **4,096 (4k)** |
-| **Fine-Tuning Type** | **Instruct** (Follows direct commands/tasks) | **Chat** (Conversational, RLHF tuned) |
-| **Quantization Method** | Q4_K_M (4-bit) | Q4_K_M (4-bit) |
-| **File Size (Approx.)** | ~4.1 GB | ~4.1 GB |
-| **VRAM Required** | ~4.5 GB + **high memory for KV cache** | ~4.5 GB + low memory for KV cache |
-
-
-**[Remote-PC]** Inside a new Docker shell, you can monitor the system resources on the Remote-PC with the following commands running in the background. While running the Python scripts, watch nvidia-smi and top. Note the difference in VRAM usage and RAM before the script runs, during the model loading phase, and during inference.
-
-**CPU and RAM Usage**
-```
+```bash
 top
 ```
 
-**GPU Usage**
-```
+```bash
 nvidia-smi
 ```
 
-**[Remote-PC]** Go to the folder with the demo code.
+**You should see:** `top` shows how busy the CPU and memory are. `nvidia-smi` shows the graphics card (GPU) memory.
+
+```text
+| NVIDIA-SMI 580.126.09     Driver Version: 580.126.09     CUDA Version: 13.0 |
+| GPU  Name                 ...                  Memory-Usage | GPU-Util |
+| N/A   42C    P8              3W /   60W |    4893MiB /   8151MiB |      0%  |
+```
+
+**What you learn:** The GPU has only 8 GB of memory. If the number next to `MiB /` gets close to 8151, the program may crash. Watch these windows whenever you load a model.
+
+---
+
+## Step 5: Read about Whisper
+
+**Read:** <https://openai.com/index/whisper/>
+
+**What you learn:** Whisper is a program trained on lots of recorded speech. It listens to audio and writes down the words.
+
+---
+
+## Step 6: Try Whisper and eSpeak together
+
+**Do:** In the container, go to the demo folder and run the test. When it says "Speak now", say a short sentence for 5 seconds. The first run is slow because it downloads the Whisper model.
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
-
+python3 test_whisper.py
 ```
 
-**[Remote-PC]** Try running llama-2-7b-32k-instruct via Q4 quantization on a new Docker shell. 
+**You should see:**
 
-Be prepared to wait for a while to load the LLM model into VRAM during the first run.
+```text
+Initializing Whisper
+Whisper Ready.
+
+Recording for 5 seconds using arecord. Speak now!
+Recording WAVE 'echo_audio.wav' : Signed 16 bit Little Endian, Rate 44100 Hz, Stereo
+Recording finished.
+
+Transcribing.
+
+You said: Hello, this is a test.
+
+Speaking: 'Hello, this is a test.'
+```
+
+You should also **hear** the computer repeat your sentence in a robot voice.
+
+**What you learn:** Your voice was turned into text by Whisper, then read back by eSpeak. This is the "ears" and "mouth" of your robot.
+
+---
+
+## Step 7: Try a different Whisper size
+
+**Do:** Open `test_whisper.py` and find this line:
 
 ```python
-MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-instruct.Q4_K_M.gguf")
-
+whisper_model = WhisperModel("base", device="cuda", compute_type="float16")
 ```
+
+Change `"base"` to `"tiny"`, run it again and say the same sentence. Then try `"small"` and `"medium"`. Watch the `nvidia-smi` window each time.
+
+**You should see:** the same kind of output as Step 6. The bigger the model, the longer it takes to load and the more GPU memory it uses.
+
+| Model | Memory (about) | What to notice |
+| --- | --- | --- |
+| tiny | 0.15 GB | Fast, but may mishear words |
+| base | 0.2 GB | |
+| small | 0.6 GB | |
+| medium | 1.5 GB | Slower, usually more accurate |
+
+**What you learn:** Bigger AI models are usually better but slower and hungrier for memory. Picking a model is always a trade-off.
+
+---
+
+## Step 8: Read about language models
+
+**Read:** <https://mark-riedl.medium.com/a-very-gentle-introduction-to-large-language-models-without-the-hype-5f67941fa59e>
+
+**What you learn:** A Large Language Model (LLM) is a program that is very good at guessing the next word. That one skill lets it answer questions and follow instructions.
+
+---
+
+## Step 9: Chat with the "instruct" model
+
+**Do:** Run the text chat demo. When it asks `You:`, type the question below and press Enter. The model takes a minute to load the first time. Type `exit` to quit.
 
 ```bash
 python3 test_llama_text.py
-
 ```
 
-**[Remote-PC]** Close the previous program with ctrl + c on the terminal. Modify the demo code so that you can chat with a llama via text, but with llama2-7b-chat and re-execute the demo.
+Type this question:
 
-```python
-MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-chat.Q4_K_M.gguf")
-
-```
-
-```bash
-python3 test_llama_text.py
-
-```
-**[Remote-PC]** You can add the ability to have a system prompt or a pre-prompt by modifying the text inference loop. Close the previous program with ctrl+c and try running this demo code on the docker shell.
-
-```bash
-python3 test_llama_text_system.py
-
-```
-
-| Feature | `llm(...)` | `llm.create_chat_completion(...)` |
-| :--- | :--- | :--- |
-| **Python Method** | Calls the class `__call__` dunder method (acts as an alias for `create_completion`). | Calls a specific class method designed for chat formatting. |
-| **Input Parameter** | `prompt` | `messages` |
-| **Input Data Type** | String (`str`) | List of Dictionaries (`list[dict]`) |
-| **Yielded Object** | Dictionary containing a `text` key. | Dictionary containing a `delta` object. |
-| **Best Use Case** | Raw text prediction, code completion, or legacy base models. | Instruction-tuned models and multi-turn conversations. |
-
-
-**[Remote-PC]** Try following tasks and try different prompting techniques on two different models, chat and instruct. 
-
-You are expected to use system prompts as well as prompting techniques during your trials.
-
-This is an example of a good system prompt for general questions and answering tasks to get you started:
-
-```
-You are a robotics teacher. Your goal is to teach students about robotics concepts. Do not output any conversational text or greetings. 
-```
-
-Here is a summary of the prompting techniques useful for these tasks. For a more detailed description, please consult the appendix. 
-
-* **Zero-Shot Prompting:** Giving the AI a task without providing any prior examples or demonstrations. The model relies entirely on its pre-trained knowledge to understand and execute the instruction.
-* **Few-Shot Prompting:** Providing a few examples (input-output pairs) within the prompt to guide the AI. This demonstrates the specific pattern, style, or strict format you want the model to follow before giving it the actual task. 
-* **Chain-of-Thought (CoT) Prompting:** Instructing the AI to break down its reasoning step-by-step (often by simply adding a phrase like *"Let's think step by step"*). This significantly improves the model's accuracy on complex math, logic, and reasoning tasks by forcing it to map out its logic before arriving at the final answer.
-
-**General Question and Answering Tasks**
-
-You should modify prompts with appropriate techniques if you were to try out different prompting methods. We give you these general questions to try out the effects of zero-shot, few-shot, and chain-of-thought prompting techniques.
-
-**Follow-up Question**
-```
+```text
 Can you explain the difference between forward and inverse kinematics for a robotic arm?
 ```
 
-(After it answers...)
+**You should see:** a lot of loading messages first, then your prompt, then the answer appearing word by word. Your answer will be different.
 
-```
-Which one is generally considered more computationally difficult to solve and why?
-```
-**Open-Ended Question**
-```
-How does a SLAM work in a robot?
-```
-**Strict Formatting**
-```
-Provide the main components of a ROS 2 system as a bulleted list. Do not add any introductory or concluding sentences. List exactly four components.
-```
-**Robotic Action Planning**
+```text
+Model loaded. Type 'exit' to quit.
 
-This is an example of a good system prompt for robot action planning to get you started:
-
+You: Can you explain the difference between forward and inverse kinematics for a robotic arm?
+Large Language Model: Forward kinematics finds the position of the robot's hand when you know
+the angle of every joint. Inverse kinematics does the opposite: ...
 ```
+
+Also look at `nvidia-smi`: the memory number jumped up by about 4 GB.
+
+**What you learn:** The "instruct" model is trained to follow instructions: you give it a task and it does it.
+
+---
+
+## Step 10: Chat with the "chat" model
+
+**Do:** Open `test_llama_text.py`. Near the top, there are two `MODEL_PATH` lines. Put a `#` in front of the first one and remove the `#` from the second one, so the chat model is used.
+
+```python
+#MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-instruct.Q4_K_M.gguf")
+MODEL_PATH = os.path.expanduser("~/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-chat.Q4_K_M.gguf")
+```
+
+Run it again and ask the **same question** as Step 9.
+
+```bash
+python3 test_llama_text.py
+```
+
+**You should see:** the same kind of output as Step 9, but the wording and style of the answer are different.
+
+**What you learn:** The "chat" model is trained for friendly back-and-forth conversation. Compare the two answers: which is longer, friendlier, or more to the point?
+
+---
+
+## Step 11: Give the model a "system prompt"
+
+**Do:** A system prompt is a rule you give the AI before the question, like "you are a robotics teacher". Run this demo and ask the same question again.
+
+```bash
+python3 test_llama_text_system.py
+```
+
+**You should see:** an answer that follows the rule in the file. The default rule asks the model to remind you to change the system prompt, so it will say so at the end.
+
+```text
+Large Language Model: Forward kinematics ... Inverse kinematics ...
+Please remember to change the system prompt after every prompt.
+```
+
+Now open the file, find `"content": "You are Large Language Model of a Robot...` and change the text to:
+
+```text
+You are a robotics teacher. Your goal is to teach students about robotics concepts. Do not output any conversational text or greetings.
+```
+
+Run it again and ask the same question.
+
+**What you learn:** A system prompt changes how the AI behaves without changing the question. This is how we will make the AI act like a robot's brain.
+
+---
+
+## Step 12: Try three ways of asking
+
+**Do:** Open `test_llama_text_system.py` and replace the system prompt text (as in Step 11) with the robot prompt below. Then run it and type each of the prompts (a), (b), (c) after it, one at a time. The robot system prompt:
+
+```text
 You are the reasoning engine for a mobile manipulator robot. Your goal is to break down user commands into a strict JSON array of physical actions. The only available actions you can choose from are: ["move_to_left", "move_to_right", "move_to_front", "move_to_back", "grab_object", "scan_environment", "release_object"]. Do not output any conversational text, greetings, or explanations. Only output the JSON array.
 ```
 
-This is a prompt asking for robot actions. 
+**(a) Zero-shot** means asking with no examples:
 
-```
+```text
 Please grab the bottle on the right and drop it in front of me, who is behind you at the start.
 ```
 
-You should modify prompts with appropriate techniques if you were to try out different prompting methods.
+**(b) Few-shot** means giving examples first:
 
-Enter the following as your user prompt. Notice how we provide two examples of what we want before giving the robot its actual task, restricting the target objects to either a "bottle" or a "teddy bear."
-
-We provide this few-shot prompting example to get you started on the robotic action planning task. Please modify as you see fit.
-```
+```text
 Command: 'Find the teddy bear on the left.'
 Output: [{"action": "scan_environment", "target": "teddy bear"}, {"action": "move_to_left", "target": "teddy bear"}, {"action": "grab_object", "target": "teddy bear"}]
 
@@ -371,516 +288,265 @@ Output: [{"action": "move_to_front", "target": "bottle"}, {"action": "grab_objec
 Command: 'Please grab the bottle on the right and drop it in front of me, who is behind you at the start.'
 ```
 
-**[Remote-PC]** Try running the demo code that allows you to have a voice conversation with a LlaMa LLM via voice using whisper and espeak. Close the previous program with ctrl+c and try running this demo code on the Docker shell.
+**(c) Chain-of-thought** means asking it to think step by step. Add this sentence to the end of (a):
 
-```bash
-python3 test_llama_whisper_and_speach.py
-
+```text
+Think step by step, then output the final JSON array.
 ```
 
-**[Remote-PC]** Refer to the appendix to tune parameters involved in the LLM inference loop and test part 4 with different parameters.
+**You should see:** (a) may give a chatty or wrong answer. (b) should give a neat list like this:
+
+```text
+[{"action": "move_to_right", "target": "bottle"}, {"action": "grab_object", "target": "bottle"}, {"action": "move_to_back", "target": "bottle"}, {"action": "release_object", "target": "bottle"}]
+```
+
+**What you learn:** How you ask matters as much as what you ask. Examples (few-shot) usually make the answer neater. The demo remembers the whole conversation, so quit (`exit`) and restart it between prompts. If you see an error about the prompt being too long, do Step 13 first, then come back.
 
 ---
 
-### Part 4: ROS2 Servers and Clients to Integrate Espeak, Whisper, and LlaMa
+## Step 13: See how much the model can remember
 
-For part 4, we will provide you with the complete ROS2 server script and ROS2 client example script on interfaces with Espeak, Whisper, and LLaMa. 
+**Do:** The model can only read a limited number of words at once. This limit is called the **context window**. Open `test_llama_text_system.py` and find:
 
-Please take a look at the provided code for ROS2 Servers and clients, and choose what models you want to use for Whisper and LLaMa by modifying the provided code. 
+```python
+n_ctx=512,
+```
 
-Option 4 of the sample client is already implemented, so no coding is required. It records your voice for a few seconds (e.g. 5 seconds), transcribes it with Whisper, sends the text to LLaMa, and reads the LLM response to you using espeak.
+The value `512` is a tested, safe setting. Raise it one step at a time (`1024`, then `1536`, then `2048`), run the few-shot prompt from Step 12 each time, and watch `nvidia-smi`.
 
-The following is an instruction to execute the provided code. 
+**You should see:** the memory number in `nvidia-smi` goes up a little each time. If the program crashes or says "out of memory", the number is too big. Go back to the last value that worked and write it down.
 
-**[Remote-PC]** Make sure that no other program is running to ensure that there is enough system resources.
+```text
+ValueError: Requested tokens (631) exceed context window of 512
+```
 
+**What you learn:** A bigger memory lets the AI read longer prompts, but it costs GPU memory. Too big, and it crashes.
 
-**[Remote-PC]** Inside the Docker shell, execute the following.
+---
+
+## Step 14: 🎥 Record Clip 1: testing the language models
+
+**Do:** Film this with a phone or camera aimed at the computer screen, while one team member narrates. **At the very start, show the face of every team member and say everyone's name.** Then repeat your favourite test from Steps 9 to 12 on screen, and **say out loud** the answers to these four questions:
+
+1. What is the difference between the "chat" and "instruct" models?
+2. What changed when you used a system prompt and when you didn't?
+3. Which way of asking (zero-shot, few-shot, chain-of-thought) worked best for you? Give one example.
+4. Which model followed strict rules better (for example, "only output a JSON list")? Give one example.
+
+**What you learn:** Explaining your results out loud shows you understood them. Short answers are fine.
+
+---
+
+## Step 15: Have a voice chat, no ROS yet
+
+**Do:** Run the voice chat demo. Wait for the text prompt, then either type or just wait 5 seconds and speak.
+
+```bash
+python3 test_llama_whisper_and_speach.py
+```
+
+**You should see:**
+
+```text
+Systems Ready — type 'exit' to quit.
+
+Type now if you want to override voice input.
+
+You (type or 's'/wait→voice):
+ Recording for 5 seconds...
+Recording finished.
+Transcribing...
+You (voice): Hello, what can you tell me about robotics?
+Large Language Model: Robotics is the study of machines that ...
+```
+
+You will also **hear** the answer spoken aloud.
+
+**What you learn:** You just built a talking assistant by joining the three tools. The next steps do the same thing the way a real robot does it, with separate programs talking to each other.
+
+---
+
+## Step 16: Start the server
+
+**Do:** Close everything else (type `exit` or press `Ctrl+C` in the demo windows) so there is enough memory. Then, in the container, start the **server**. It loads all three tools and waits for requests.
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/
 python3 sample_code_servers.py
 ```
 
-**[Remote-PC]** Inside the another Docker shell, execute the following client program that works with the server.
+**You should see:** after a minute or two, the last line says the server is ready.
+
+```text
+[INFO] [1780000000.123456789] [nlp_topic_server]: Loading Faster-Whisper (small) onto GPU...
+[INFO] [1780000004.223456789] [nlp_topic_server]: Whisper Loaded.
+[INFO] [1780000004.323456789] [nlp_topic_server]: Loading LLM from /root/my_code/Robotics_Assignment_5/Assignment_5_demo/llama-2-7b-32k-instruct.Q4_K_M.gguf...
+[INFO] [1780000012.423456789] [nlp_topic_server]: Large Language Model Loaded.
+[INFO] [1780000012.523456789] [nlp_topic_server]: Natural Language Processing Server is up. Listening to request topic.
+```
+
+**What you learn:** The server is a program that sits and waits. It does the heavy AI work whenever another program asks.
+
+---
+
+## Step 17: Start the client
+
+**Do:** Open a **new terminal**, enter the container, and start the **client**. The client is the remote control for the server.
 
 ```bash
+docker exec -it remote_pc_humble bash
 cd ~/my_code/Robotics_Assignment_5/
 python3 sample_code_clients.py
 ```
 
-**[Remote-PC]** In the client menu, try options 1, 2 and 3 first (eSpeak, Whisper, LLaMa one at a time), then option 4, which chains all three.
+**You should see:**
 
-**[Remote-PC]** The settings you may want to tune are gathered in one block at the top of `sample_code_servers.py`. Change one value at a time, restart the server, and compare the result. Use `nvidia-smi` to watch VRAM.
+```text
+========================================
+Natural Language Processing Client Test Menu
+1. Test Text-to-Speech (eSpeak)
+2. Test Speech-to-Text (Whisper)
+3. Test LLM Generation (Llama-2)
+4. Test Full Integration Pipeline for 1. to 3.
+5. Exit
+========================================
+Select an option (1-5):
+```
 
-| Setting | Values to try | What to observe |
+**What you learn:** The client and the server are two separate programs. They talk to each other using ROS 2 messages, the same way parts of a real robot do.
+
+---
+
+## Step 18: Try menu options 1, 2 and 3
+
+**Do:** Type each number, one at a time.
+
+**Option 1:** type `1`, then a sentence.
+
+```text
+Select an option (1-5): 1
+Enter text to speak: Hello, I am your robot.
+Text to Speech request sent to Remote-PC. Listen for the audio.
+```
+
+**Option 2:** type `2`, then `5`, then speak.
+
+```text
+Select an option (1-5): 2
+Enter recording duration (seconds): 5
+Server on Remote-PC is recording for 5 seconds. Speak now.
+
+Speech To Text Result : Hello, what can you tell me about robotics?
+```
+
+**Option 3:** type `3`, then a question.
+
+```text
+Select an option (1-5): 3
+Enter your prompt for the Large Language Model: What is a robot?
+Large Language Model: A robot is a machine that can ...
+```
+
+**You should see:** the matching lines in the server window.
+
+```text
+[INFO] [nlp_topic_server]: TTS Requested: 'Hello, I am your robot.'
+[INFO] [nlp_topic_server]: Text To Speech Complete.
+[INFO] [nlp_topic_server]: Speech To Text Requested: Recording for 5 seconds...
+[INFO] [nlp_topic_server]: Speech to Text Result Published: Hello, what can you tell me about robotics?
+[INFO] [nlp_topic_server]: Large Language Model Response Requested with prompt: 'What is a robot?'
+[INFO] [nlp_topic_server]: Large Language Model Generation Complete.
+```
+
+**What you learn:** Each option asks the server to do one job: speak, listen, or think.
+
+---
+
+## Step 19: Try option 4, the full conversation
+
+**Do:** Type `4`, then `5`, then say a sentence. Do not touch the keyboard after that.
+
+```text
+Select an option (1-5): 4
+Enter recording duration (seconds) [e.g. 5]: 5
+Server on Remote-PC is recording for 5 seconds. Speak now.
+
+Speech To Text Result : Hello, what can you tell me about robotics?
+Large Language Model: Robotics is the study of machines that can sense, think, and act ...
+
+Reply sent to eSpeak. Listen for the audio.
+```
+
+**You should see:** your voice turned into text, the AI's answer appearing on the screen, and the answer being read to you.
+
+**What you learn:** This is the whole pipeline: **ears (Whisper) → brain (LLaMa) → mouth (eSpeak)**. You can now talk to a computer.
+
+---
+
+## Step 20: Change the server's settings
+
+**Do:** Stop the server (`Ctrl+C` in its window). Open `sample_code_servers.py` and look at the block at the top that starts with `# Settings you can tune`. Change **one** value, start the server again, and try option 4 again.
+
+| Setting | Try this | What to notice |
 | --- | --- | --- |
-| `MODEL_PATH` | `llama-2-7b-32k-instruct...` vs `llama-2-7b-chat...` | How well each follows strict output instructions |
-| `WHISPER_MODEL` | `tiny`, `base`, `small`, `medium` | Transcription accuracy vs. delay and VRAM |
-| `SYSTEM_PROMPT` | The robot action planning prompt from Part 3, with and without a system prompt | Whether the reply stays in the format you asked for |
-| `TEMPERATURE`, `TOP_P` | `0.1` vs `0.7` vs `1.0` | How random or repeatable the replies are |
-| `MAX_TOKENS` | `32`, `128`, `256` | Length of reply, and whether it gets cut off |
-| `N_CTX` | `512` (tested default), then `1024`, `1536`, `2048` (see the experiment below) | Whether longer prompts fit, VRAM use, and whether it crashes |
+| `MODEL_PATH` | Switch between instruct and chat | The style of the answer |
+| `WHISPER_MODEL` | `"tiny"` or `"medium"` | Speed and accuracy of listening |
+| `SYSTEM_PROMPT` | The robot teacher rule from Step 11 | The tone of the answer |
+| `TEMPERATURE` | `0.1`, then `1.0` | Low is steady and repeatable. High is more random |
+| `MAX_TOKENS` | `32`, then `256` | How long (or cut off) the answer is |
+| `N_CTX` | Raise in steps of 512 | Longer prompts fit, but memory use goes up |
 
+**You should see:** the same menu and output as Step 19, with small differences caused by your change.
 
-**Experiment: how big can the context window be?** `N_CTX` (and `n_ctx` in the `test_llama_*` demos) is set to `512`, a value we have tested. It limits how many tokens the prompt and the reply can use together. Long prompts, such as few-shot or chain-of-thought examples, may not fit in 512 tokens and can fail with an error saying the prompt exceeds the context window. You can raise it to test whether the LLM works better:
-
-1. Raise `N_CTX` in steps of 512: `512`, `1024`, `1536`, `2048`, and so on. (As a rough guide, each extra 512 tokens uses about 0.25 GB more VRAM for a 7B model.)
-2. Restart the server (or the demo script) each time and watch `nvidia-smi` and `top` while the model loads and while it answers.
-3. Re-run the same prompt, for example the few-shot robot action planning prompt, and compare the answers.
-4. If the program crashes, hangs, or reports out of memory, the value is too high for this laptop. Go back to the last value that worked and write it down.
-
-The chat model supports at most 4096 tokens. The instruct model supports far more, but your 8 GB of VRAM will run out much sooner.
+**What you learn:** You can change how an AI behaves just by changing a few numbers and sentences.
 
 ---
 
-### Video Demo Requirements (4-5 Minute Demonstration)
+## Step 21: 🎥 Record Clip 2: show us the code
 
-Please refer to the video submission requirements in the introduction.
+**Do:** Start filming (phone or camera aimed at the screen). Open `sample_code_servers.py` and `sample_code_clients.py` on screen. Point at the code and say, in your own words, in about one minute:
 
-Your submission must include links to the video files.
+1. **Server:** Which Whisper model and which LLaMa model did you choose, and why? Which settings did you change?
+2. **Client:** How does the client ask the server to speak, listen and think?
+3. **Option 4:** How does it join the three steps in order?
 
-#### Part A: LLM Testing
-
-The goal of this part is to demonstrate that you have tested the two provided LLMs, chat and instruct finetuned LLaMa2.
-
-**LLM Insights and Logical Test:**
-* **Model Comparison:** In your narration, briefly explain the conceptual difference between chat and instruct LLM models. 
-* **System Prompt Comparison:** In your narration, briefly explain the effects of having a system prompt and not having a system prompt.
-* **Prompting Technique Comparison:** In your narration, briefly explain your experience with  various prompting techniques.
-  
-**Task Execution:** Discuss the result of various tests you did with prompts in Part 3 of the assignment.
-* Did the LLM successfully output what you specified? State with a few examples.
-* Compare how the llama-2-7b-chat model handles output strict constraint versus the llama-2-7b-32k-instruct model. Which one was better at following your request? State with a few examples.
-
-#### Part B: Code Walkthrough
-
-The goal of this part is to explain the ROS2 architecture we provided. With your source code visible, guide us through the key components of the scripts.
-
-**Remote PC Server:**
-* Explain the Whisper publisher server that captures audio and publishes the transcribed text. Mention the model you chose for this task with brief reasoning behind your decision.
-* Explain the LLaMa publisher server, showing how it receives a prompt, processes it, and returns the generated text as a result. Mention the model you chose for this task with brief reasoning behind your decision, and model and inference parameters that support it. For a description of the parameters, please consult the appendix.
-* Explain the Espeak publisher server, showing how it receives text as a request and uses the TTS engine to produce audio.
-
-**Remote PC Client:**
-* Explain the client architecture on how it interfaces with the publisher servers mentioned above.
-* Explain how option 4 of the client chains the three servers together to have a conversation with the LLM.
-
-
-#### Part C: Live System Demonstration
-
-In this part, you will run our full system to demonstrate each AI model and the ROS2 communication between them, and tune the server settings to demonstrate you understand how to use the provided ROS2 server for the Natural Language Pipeline.
-
-**Whisper (Speech-to-Text):**
-* Speak a clear English sentence into the microphone (e.g., "Hello, what can you tell me about robotics?").
-* Show the terminal on your Remote-PC where your publisher and subscriber nodes handling your request.
-
-**LLaMa (Language Model Response):**
-* Show the LLaMa model processing the request on the screen.
-* Show the text response from LLaMa being received and displayed on the Remote PC.
-
-**espeak (Text-to-Speech):**
-* Take the text response generated by LLaMa and use your Remote PC client to send it as a goal to the Espeak publisher server.
-
-**Full Integration (Run option 4 of sample_code_clients.py, which chains interactive menu options 1 to 3)**
-You can refer to the demo code **test_llama_whisper_and_speach.py** for the expected behavior when thee are fully integrated.
-The following steps should require no keyboard input from the user.
-
-* Show that your voice is transcribed into text and given as input to the LLaMa.
-* Show the text response from LLaMa being received and displayed on the Remote PC.
-* Show that the text response from LLaMa is read by espeak.
+**What you learn:** You do not need to understand every line. The goal is to see the big picture: *request in, work done, answer out*.
 
 ---
 
-### Appendix
+## Step 22: 🎥 Record Clip 3: live demo
 
-#### [Optional][Guide] How to Run Espeak, Whisper, and LLaMa.cpp on your Ubuntu Desktop
+**Do:** Start filming (phone or camera aimed at the screen and the speaker, so the sound is clear). Start the server and the client. With the screen showing both windows, run:
 
-**Running Espeak**
-You can reasonably run the Espeak text-to-speech synthesizer on your own desktop machine with any architecture, meaning CPU performance for Espeak is reasonable. This guide is intended to allow your machine to run Espeak, which might help you with offloading some of the development for this assignment to your own machine. However, while this instruction was tested on our machines, we would not offer official support for you running Espeak on your own machine.
+1. Option 1: it speaks a sentence you type.
+2. Option 2: say a clear sentence, for example "Hello, what can you tell me about robotics?", and show the text.
+3. Option 3: type a question and show the LLM's reply.
+4. Option 4: do the full voice conversation, with **no keyboard use** after choosing the option. Show that your voice became text, the LLM answered, and the answer was spoken.
 
-**[Your PC]** On your terminal, install the Espeak package
-
-```bash
-sudo apt install espeak-ng
-
-```
-
-**Running Whisper**
-Reference: [https://github.com/openai/whisper](https://github.com/openai/whisper)
-
-You can reasonably run the Whisper voice-to-text model on your own desktop machine with any architecture, meaning CPU-only performance for Whisper is reasonable. This guide is intended to allow your machine equipped with an Nvidia GPU to run Whisper, which might help you with offloading some of the development for this assignment to your own machine. However, while this instruction was tested on our machines, we would not offer official support for you running Whisper on your own machine.
-
-**[Your PC]** It is not recommended to install Whisper or LLama in a Python virtual environment, such as Conda, if you want it to work well with ROS2 or other binary programs installed through apt-get.
-
-You can deactivate your Python virtual environment temporarily and install the necessary packages if you need your virtual environment.
-
-**[Your PC]** Install GPU drivers such as CUDA, and neural network dependencies such as Pytorch and TorchAudio. When installing PyTorch and TorchAudio, please follow the exact instructions on the official website. [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/) .
-
-**[Your PC]** On your terminal, install the OpenAI-Whisper package
-
-```bash
-pip install -U openai-whisper
-
-```
-
-**Running LlaMa**
-Reference: [https://github.com/ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp)
-
-You can technically run the Llama LLM model on your own desktop machine with any architecture. However, given how demanding LLMs can be, a Nvidia GPU or Apple Silicon will be necessary to achieve reasonable performance. This guide is intended to allow your machine equipped with an Nvidia GPU to run LLMs, which might help you with offloading some of the development for this assignment to your own machine. However, while this instruction was tested on our machines, we would not offer official support for you running LLaMa on your own machine.
-
-**[Your PC]** Install NVidia GPU drivers, such as CUDA drivers.
-
-**[Your PC]** On your terminal, install llama-cpp-python with DGGML_CUDA args. If you do not have the args, you will not be able to offload your layers onto the GPU, resulting in low performance.
-
-```bash
-CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python
-
-```
-
-**[Your PC]** Llama.cpp uses a specific format called GGUF. Please download the models for the assignment from the following links on HuggingFace. They do not require api authorization.
-
-```bash
-wget -c https://huggingface.co/TheBloke/Llama-2-7B-32K-Instruct-GGUF/resolve/main/llama-2-7b-32k-instruct.Q4_K_M.gguf
-wget -c https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
-
-```
-
-**[Your PC]** Modify the example codes given to reference downloaded models from step 3.
-
-## [Guide] Prompt Engineering Techniques for Large Language Models
-
-**[Recommended Reading] Can Large Language Models Transform Computational Social Science?**
-
-[https://aclanthology.org/2024.cl-1.8/](https://aclanthology.org/2024.cl-1.8/)
-
-One strength of current LLMs is their ability to be “programmed” through natural language instructions. This process is called prompt design or prompt engineering. However, prompt design is more of an art than a science, and there is no fixed way to get the best result for every scenario.
-
-Nevertheless, after years of experience dealing with LLMs, certain sets of guidelines emerged from the know-how of the practitioners. The above paper discusses how to get consistent machine-readable outputs for CSS tasks. While authors did not intend to use these techniques for robotics tasks, the techniques presented are still relevant today.
-
-**[Recommended Reading]  Large Language Models are Zero-Shot Reasoners.**
-
-[https://arxiv.org/pdf/2205.11916](https://arxiv.org/pdf/2205.11916)
-
-Along with these helpful guidelines, there are prompting techniques that guide LLMs to the desired output. Here we will discuss Zeroshot prompting, Few-shot prompting, and Chain of Thought prompting with a relevant diagram from Kojima et.al’s paper and relevant examples in the context of robotics.
-
-**Zero-shot prompting** is the simplest form of prompting, where you give the LLM the command and hope it understands the context and desired output format. In this case, a bit more context is given within the prompt to restrict the action space of the agent.
-
-> Prompt: My available skills are [navigate, grasp, release, find].
-> User command: "Get me the red bottle."
-> Robot command:
-
-The potential problem is that the LLM might output a conversational answer ("Sure, I will get the red bottle for you!") or an incorrect, one-shot plan (`grasp('red_bottle')`, which fails because the robot isn't near it). In short, this prompting technique is unreliable.
-
-We can definitely improve upon this by providing a few examples or “shots” in the prompt to show the LLM exactly what a good input-output pair looks like. This is called **Few-shot prompting**.
-
-```text
-You are a robot controller. Translate user commands into a single, valid robot action.
-My available skills are [navigate, grasp, release, find].
+**What you learn:** You can now show a working natural-language pipeline end to end.
 
 ---
-User: "Go to the kitchen table."
-Robot: navigate('kitchen_table')
+
+## Step 23: Submit
+
+You must submit **3 video clips**. Tick every box before you submit.
+
+- [ ] **Clip 1: Testing the language models.** Shows every team member's face and name at the start. Shows your tests with the chat and instruct models, the system prompt, and zero-shot, few-shot and chain-of-thought prompts. The narrator answers the four questions from Step 14.
+- [ ] **Clip 2: Code walkthrough.** Shows `sample_code_servers.py` and `sample_code_clients.py`. The narrator explains the models and settings chosen, how the client talks to the server, and how option 4 joins the three steps.
+- [ ] **Clip 3: Live demo.** Shows the server and client running. Options 1, 2 and 3 each work once, then option 4 runs the full voice conversation with no keyboard use after choosing it.
+
+For every clip: film the screen with a phone or camera while one team member narrates. You do not need to edit, and a few minutes in total is enough.
+
+**How to hand in**
+
+1. Upload each clip to YouTube and set it to **Unlisted**. Do not upload the raw video files to Canvas.
+2. **Every team member** pastes all 3 links into Canvas under **Assignment 5**, even if the team recorded the clips together.
+
+Source code is **not** required for this assignment.
+
 ---
-User: "Pick up the toy."
-Robot: grasp('toy')
----
-User: "I see a soda can."
-Robot: find('soda_can')
----
-User: "Get me the red bottle."
-Robot:
 
-```
+## Optional: want to learn more?
 
-The LLM agent will now certainly output relevant actions, but it is still one-shot and will show limitations when dealing with longer multi-step plans.
-
-By instructing LLMs to think step by step before giving a final answer, it forces them to reason about the problem before blurting out an action sequence. This is called **Chain of Thought Prompting**. The following shows a full set of prompts and responses from a few-shot COT.
-
-> ## My available skills are [navigate, grasp, release, find]. User command: "Get me the red block and put it in the blue box." Think step-by-step about the plan. Then, output the full plan. Here are examples of prompt action pairs.
-> 
-> 
-> User: "Go to the kitchen table."
-> …
-> Plan:
-
-The result can be as follows.
-
-```text
-Plan:
-1.  First, I need to find the red bottle.
-2.  Then, I need to navigate to the red bottle.
-3.  Then, I need to grasp the red bottle.
-4.  Then, I need to find the blue box.
-5.  Then, I need to navigate to the blue box.
-6.  Finally, I need to release the bottle.
-Action:
-[navigate('red_bottle'), grasp('red_bottle'), navigate('blue_box'), release()]
-
-```
-
-This should be enough for the requirements of assignment 5. However, the output is still a static, open-loop plan that executes the entire plan without feedback. This kind of open-loop control can work for simple tasks, but it can have problems with unexpected disturbances.
-
-**[Recommend Reading] ReAct: Synergizing Reasoning and Acting in Language Models**
-[https://arxiv.org/abs/2210.03629](https://arxiv.org/abs/2210.03629)
-
-**[Recommend Reading] ReAct prompting.**
-[https://www.promptingguide.ai/techniques/react](https://www.promptingguide.ai/techniques/react)
-
-The final prompting technique we want you to look into as a challenge is **ReAct**. The ReAct (Reasoning + Acting) framework is a powerful prompting technique that structures an LLM's output to solve complex tasks, making it ideal for robotics. Instead of just outputting a final answer or action, ReAct prompts the LLM to explicitly interleave its reasoning process with its actions.
-ReAct works in a tight loop consisting of Thought, Action, and Observation. Thought (T): The LLM analyzes the goal and the current state to decide what to do next. Action (A): The LLM outputs one single command from the allowed skill list. Observation (O): The robot executes that one command. The result (e.g., "Grasp failed" or "Grasp successful") is converted to text and fed back into the prompt. The process is illustrated in the figure from the referenced paper.
-
-Let's discuss this in the context of our example scenario stated in Part 2:
-**Goal:** "I'm thirsty, please get me the red water bottle from the table."
-**Initial State:** Robot is in the living room. It sees [table, chair, human].
-
-**Loop 1: Find the Bottle**
-Prompt (Simplified):
-
-> You are a TurtleBot3 with wheels and a robotic arm.
-> Skills: [navigate, grasp, release, find, speak].
-> Goal: "I'm thirsty, please get me the red water bottle from the table." Observation: You see [table, chair, human]. Gripper is empty.
-> Thought:
-
-LLM Generates:
-
-> Thought: The user wants the 'red_water_bottle'. I can't see it, but I see the 'table' they mentioned. I should go to the table to get a better look.
-> Action: Maps('table')
-
-**Loop 2: Scan for the Object**
-System (Executes Action): The TurtleBot base drives to the table.
-New Prompt:
-
-> ...[previous history]... Observation: Action Maps('table') was successful. You are now at the table. You see [soda_can, red_water_bottle]. Gripper is empty. Thought:
-
-LLM Generates:
-
-> Thought: I am at the table and now I can see the 'red_water_bottle'. I need to get its precise location before I can grab it. Action: find('red_water_bottle')
-
-**Loop 3: Handle a Physical Failure (The Power of ReAct)**
-System (Executes Action): The camera tries to find the bottle, but it's partially blocked.
-New Prompt:
-
-> ...[previous history]... Observation: Action find('red_water_bottle') failed. The object is occluded by 'soda_can'.
-> Thought:
-
-LLM Generates:
-
-> Thought: I can't find the red water bottle because the soda can is in the way. I must move the soda can first. I will grasp the soda can and move it.
-> Action: grasp('soda_can')
-
-**Loop 4: Self-Correction and Re-planning**
-System (Executes Action): The manipulator arm grasps the soda can.
-New Prompt:
-
-> ...[previous history]... Observation: Action grasp('soda_can') was successful. Gripper is holding soda can. Thought:
-
-LLM Generates:
-
-> Thought: I am holding the soda can. I need to put it down somewhere to clear the view. I will release it on the table in a clear spot.
-> Action: release()
-
-**Loop 5: Re-try the Original Goal**
-System (Executes Action): The arm releases the can.
-New Prompt:
-
-> ...[previous history]... Observation: Action release() was successful. Gripper is empty. The water_bottle is now visible. Thought:
-
-LLM Generates:
-
-> Thought: The path is clear. Now I can try my original plan again. I will find and then grasp the water bottle.
-> Action: grasp('water_bottle')
-
-(Loop continues until the end)…..
-
-Implementing a full ReAct prompt system would be a challenge. However, this kind of corrective loop would be necessary for a production system designed to control robots reliably outside the controlled lab environment.
-
-We would leave you with a couple of free prompt optimizer tools that optimize prompts for LLMs for you to explore.
-
-[https://www.quartzite.ai/tools/free-ai-prompt-optimizer](https://www.quartzite.ai/tools/free-ai-prompt-optimizer)
-[https://promptperfect.jina.ai/interactive](https://promptperfect.jina.ai/interactive)
-
-#### [Optional Reading] Running Large Language Models on Edge Systems
-
-Edge systems such as laptops and Nvidia Jetsons have limited resources compared to full-fledged servers with a large power budget. As such, optimizations are necessary to run demanding AI models such as Large Language Models. We have summarized such optimizations in this section. This section focuses on how to set up the edge system for running LLMs and how to decide on the best model for yourself.
-
-This reading assumes that you have generic knowledge of Large Language Models, including tokenization, embeddings, and the training process of LLMs. 
-
-**LLaMa.cpp Open Source C++ Library**
-
-LlaMa.cpp is an open-source C++ library for running large language models. Being written in plain C++ with no dependencies, it makes it extremely fast and lightweight. A noteworthy feature is that it can offload parts or all parts of models onto the GPU, making it possible to cater to a wide range of devices, including Nvidia Jetson.
-To support this capability, llama.cpp was compiled from source with support for CUDA, which also enables other support libraries such as the cuBLAS (Basic Linear Algebra Subprograms) library. All of this can be done with the following flags while running CMake.
-
-```bash
-git clone https://github.com/ggerganov/llama.cpp.git
-cd llama.cpp
-cmake -B build -DGGML_CUDA=ON 
-
-```
-
-Llama uses the GGUF format or Georgi Gerganov's Universal Format (creator of llama.cpp) to distribute and run large language models. This is in contrast with PyTorch, which uses multiple files, such as config.json, tokenizer.model, model.saftensors etc. The GGUF file includes everything you need to run the model, including the quantized model weights, all model metadata, the tokenizer that converts text into tokens, and the prompt template that tells whether it is a chat model or an instruct model.
-A few noteworthy features for LlaMa.cpp include Broad Model Support and Collection of Useful Tools. Despite its name, it doesn't just run Llama models. It supports a wide variety of open-source architectures, including Mistral, Phi-2, Qwen, and many others. Also, it comes with several ready-to-use command-line tools, including the following: main: A tool for running text generation. server: A tool that runs the model as an OpenAI-compatible web server, so you can interact with it through an API. quantize: A tool to convert and quantize models into the GGUF format.
-
-**LLaMa.cpp Python Binding Code Explanation**
-LlaMa.cpp does offer Python bindings, which you can use to integrate it into various Python programs. We will skip how you can install it via local pip installation when you compile it from source. The following code explanation is intended to let you understand the demo code provided that interfaces with LLaMa.cpp python binding.
-
-**Importing Llama Python binding**
-
-```python
-from llama_cpp import Llama
-
-```
-
-**Model Initialization**
-
-This is where the model is loaded into memory with specific settings.
-
-* `model_path=MODEL_PATH`: Tells the Llama class which model file to load.
-* `n_ctx=512`: Sets the context size to 512 tokens. This is the "memory" of the model for a given conversation. It means the model can "see" the last 512 tokens (both your prompts and its replies) to generate the next token. A larger context allows for longer conversations but uses more RAM.
-* `n_threads=4`: Allocates 4 CPU threads for the model to use. This can speed up parts of the processing, especially prompt ingestion.
-* `n_gpu_layers=33`: This is a key performance setting. It tells the library to offload 33 layers of the model to the GPU. The more layers on the GPU, the faster the text generation will be. A value of -1 usually means "offload all possible layers."
-* `seed=42`: Sets a specific seed for the random number generator. This makes the model's output deterministic. With the same seed, prompt, and settings, the model will always produce the same response. This is useful for debugging, but can be removed for more varied, "creative" answers. In this case, 42 was chosen.
-* `use_mlock=True`: This tells the operating system to "lock" the model in your computer's RAM. This prevents the OS from swapping parts of the model data to the disk (virtual memory), which can improve performance by ensuring the model is always instantly accessible.
-
-```python
-llm = Llama(
-        model_path=MODEL_PATH,
-        n_ctx=512,
-        n_threads=4,
-        n_gpu_layers=33,
-        seed=42,
-        use_mlock=True
-  )
-
-```
-
-**The Interactive Chat Loop**
-
-The following shows a chat loop that prints the output in a streaming fashion. The parameters involved are described in the section below.
-
-* `flush=True`: This forces the output to appear on the screen immediately, rather than being held in a buffer.
-* `for chunk in llm(...)`: This is the call to the model. Because `stream=True` is set, the llm object doesn't return the full answer at once. Instead, it acts as a generator, yielding a small chunk of data for each new token it produces.
-
-**Generation Parameters (inside llm() call)**
-
-* `prompt=prompt`: The user's input.
-* `max_tokens=128`: The model will generate a reply up to a maximum of 128 tokens long.
-* `stop=["\nYou:"]`: A "stop sequence." If the model generates the exact text \nYou:, it will immediately stop generating, even if it hasn't reached max_tokens. This is crucial for a chatbot to prevent it from hallucinating the user's next reply.
-* `echo=False`: If True, the model's output would include your prompt first. False means it only outputs its own reply.
-* `temperature=0.7`: Controls the randomness of the output. 0.7 is a balanced value. A lower value (e.g., 0.2) makes the model more deterministic and "safe," while a higher value (e.g., 1.0) makes it more creative but also more prone to errors.
-* `top_p=0.95`: A sampling method that considers only the most likely tokens whose combined probability is over 95%. It's another way to control creativity and avoid weird tokens.
-* `stream=True`: This enables the streaming behavior, returning one token at a time. You can turn it off to get all the replies at once once LLM is ready.
-
-**Handling output:**
-
-* `token = chunk["choices"][0]["text"]`: The chunk is a dictionary. This line extracts the actual text of the generated token.
-* `full_reply += token`: This (unused) variable appends the new token to a string, building the complete reply.
-* `print(token, end="", flush=True)`: It prints the single token to the screen, again with end="" (so all tokens appear on the same line) and flush=True (to show it immediately).
-
-```python
-while True:
-        prompt = input("\nYou: ")
-        if prompt.strip().lower() in ("exit", "quit"):
-            break
-
-        print("Assistant: ", end="", flush=True)
-        full_reply = ""
-        for chunk in llm(
-            prompt=prompt,
-            max_tokens=128,
-            stop=["\nYou:"],
-            echo=False,
-            temperature=0.7,
-            top_p=0.95,
-            stream=True
-        ):
-            token = chunk["choices"][0]["text"]
-            full_reply += token
-            print(token, end="", flush=True)
-        print()
-
-```
-### The Stateful Chat Loop create_chat_completion
-The following shows a stateful chat loop. Unlike the basic text inference loop which treats every input as an isolated event, this loop maintains conversation history by passing a structured list of messages.
-
-**Core Differences in the Loop:**
-* **`messages` instead of `prompt`:** You no longer pass a single raw string. Instead, you pass a list of dictionaries (e.g., `[{"role": "system", "content": "..."}, {"role": "user", "content": "..."}]`). The `chat_format` specified when loading the model automatically handles the internal prompting syntax (like `[INST]` tags for Llama 2).
-* **Appending History:** To maintain context, you must append both the user's new input and the assistant's final generated reply to the `messages` list during every loop iteration.
-* **No `echo` parameter:** Because inputs and outputs are strictly separated by roles in the `messages` list, the `echo` parameter is no longer used or needed.
-
-**Handling Output (The "Delta"):**
-Because this method follows the standard chat API structure, the yielded data chunk is formatted differently when `stream=True` is enabled.
-* **`delta = chunk['choices'][0].get('delta', {})`:** Instead of providing the absolute text directly, the chunk provides a "delta," representing the change in the stream's state. 
-* **`token = delta.get('content', '')`:** This safely extracts the newly generated text token from the delta. If the delta is empty (like at the very end of the stream), it returns an empty string.
-
-```python
-    system_message = {
-        "role": "system",
-        "content": "You are a helpful assistant."
-    }
-    messages = [system_message]
-
-    while True:
-        user_input = input("\nYou: ")
-        if user_input.strip().lower() in ("exit", "quit"):
-            break
-
-        # 1. Append the user's new prompt to the conversation history
-        messages.append({"role": "user", "content": user_input})
-
-        print("Assistant: ", end="", flush=True)
-        full_reply = ""
-        
-        # 2. Pass the entire message history, not just the prompt
-        for chunk in llm.create_chat_completion(
-            messages=messages,
-            max_tokens=128,
-            stop=["\nYou:"],
-            temperature=0.7,
-            top_p=0.95,
-            stream=True
-        ):
-            # 3. Extract tokens using the 'delta' object
-            delta = chunk['choices'][0].get('delta', {})
-            token = delta.get('content', '')
-            
-            if token:
-                full_reply += token
-                print(token, end="", flush=True)
-                
-        # 4. Append the assistant's final reply to the history to maintain memory
-        if full_reply:
-            messages.append({"role": "assistant", "content": full_reply})
-            
-        print()
-```
-
-**Quantization Techniques for LLMs**
-
-Even with optimizations made on LlaMa.cpp, we still need to optimize the model itself to run on edge devices. One of the most important techniques is quantization. Quantization is the process of reducing the precision of a model's weights (its parameters). Most models are trained using 32-bit floating-point (FP32) or 16-bit floating-point (FP16) numbers. These numbers are very precise (e.g., 3.14159265...). Quantization converts these high-precision numbers into lower-precision numbers, like 8-bit integers (INT8) or 4-bit integers (INT4). These numbers are less precise (e.g., they might only store 3.14).
-
-Quantization has two massive benefits for devices like edge devices. The first is Smaller Model Size. The model file becomes significantly smaller. A 7B model that is ~14GB at FP16 becomes only ~3.8GB at 4-bit. This is the difference between fitting in RAM or not. The second is Faster Inference. CPUs and GPUs can perform math on integers much faster than on floating-point numbers. This results in a significant speed-up in how fast the model can generate tokens. The trade-off is a very small loss in accuracy, but modern quantization methods make this loss acceptable.
-
-Smaller model size is crucial for running on edge devices, which only has 8GB of VRAM in our case. The model's context (the "memory" of the conversation) needs to be where the CPU and GPU can access it. Otherwise, if you run out of VRAM, you will crash the LLM.
-
-Let us now talk about the quantization ecosystem relevant to users when they want to download a model from Hugging Face. The following shows a GGUf file from HuggingFace that was used as a demo in this assignment.
-
-`llama-2-7b-32k-instruct.Q4_K_M.gguf`
-
-From the name of the model, aside from the fact that this is an LlaMa2 model with 7b parameters, we can actually see the type of quantization technique used before distribution on Hugging Face.
-
-"K-M" refers to a specific, advanced quantization method used in llama.cpp. The "K" stands for K-means (a clustering algorithm). Older 4-bit quantization methods (like Q4_0) were simple and fast but lost more accuracy. The "K-quants" are smarter. Instead of just rounding numbers, the K-means algorithm is used to group the model's weights into clusters. It then stores the centroids (the center point) of those clusters. This method is much better at preserving the important information in the weights, leading to a much lower accuracy loss.
-
-Therefore, when you see a file named `llama-2-7b-chat.Q4_K_M.gguf`, you can note the following from the file name: Q4: It's a 4-bit quantization. _K: It uses the advanced K-means method. _M: This stands for "Medium." It uses a 256-block size, which offers the best balance between quality and file size. You may also see _S (Small), which is slightly lower quality but smaller.
-All in all, Q4_K_M is generally the recommended 4-bit quantization for most users. It provides an excellent balance of small size, high speed, and low accuracy loss.
-
-**Context Window and Finetuning Methods for LLMs**
-
-So far, the discussion on llama.cpp and quantization has been concerned with how to run aspects of LLMs. This information might be enough for you to start running LLMs on edge devices without crashing. However, you should now shift your focus to finding a suitable model for you to achieve your goals of running LLMs on the edge.
-You might have noticed that sometimes there is a smaller number like 32k listed after a big number, such as 7b, in some LLM models on Hugging Face. For file name `llama-2-7b-32k-instruct.Q4_K_M.gguf`, 32k refers to the token count of the context window. This is the model's memory, equivalent to about 24000 English words with about 3-4 English characters per token. This means the model can read, process, and remember a prompt and its ongoing conversation up to the length of 32k tokens. This is a very large context window. The original Llama 2 model was only 4,000 tokens (4k). A 32k model is specifically designed for tasks involving long documents. You can paste in an entire chapter, a long research paper, or a big block of code, and ask complicated questions with many logical steps, which a 4k model could not handle.
-
-Another factor that influences decisions regarding LLM is the fine-tuning process. Base LLMs are trained to predict words within a context. In the case of LlaMa2, it was trained on a massive portion of the internet. It's a "next-word predictor." If you give it the prompt "What is the capital of France?", it might just complete it with "...and what is its population?" because that's a statistically likely sentence. As such, base LLMs are not very useful for scientific and engineering applications such as robotics.
-
-We can specialize generic base LLMs to specific applications with a fine-tuning process. So far, we have given you access to two types of models, chat and instruct. Chat models are finetuned on a dataset of high-quality multi-turn conversations. It learns the "recipe" for being a helpful chatbot. Now, when you ask "What is the capital of France?", it knows you're asking a question and responds, "The capital of France is Paris.". As such, it learns the flow and structure of a back-and-forth dialogue. Its ultimate goal is to make the model an excellent conversational partner. As such, it's optimized for natural, multi-turn dialogue, remembering previous parts of the conversation. Instruct models are finetuned on a dataset of (instruction, response) pairs. It's like a giant flashcard deck of commands and the correct answers intended for a skilled assistant. For example, an instruction can be "Summarize the following article about electronics", and the response can be  "This article discusses the…”. As such, it learns how to follow specific, single-turn commands. It's task-oriented. You give it a clear task, and it executes that task.
-
-In conclusion, while there are many different factors that influence decisions on which models to use, such as multi-modality and benchmark performance, we often need to make compromises to find a model that works for a purpose. We often find that brute forcing does not work due to resource constraints. Nevertheless, there can still be some compromises that allow at least part of what we want. In that case, we need to find optimizations and specializations necessary to find a good middle ground for our tasks.
+- How LLMs can plan robot actions (ReAct): <https://www.promptingguide.ai/techniques/react>
+- Prompting techniques guide: <https://www.promptingguide.ai/techniques>
