@@ -18,6 +18,8 @@ You are not required to write any code. You will run the provided programs, chan
 
 **How to use this guide.** Please complete the steps in the order given. Each step begins with what you will learn. After each command, we show an example of the output that you should see, so that you can check your own results. Small differences, such as numbers, timestamps, and the exact words of the language model's answers, are normal.
 
+**The computer you will use.** All steps in this assignment are performed on the **Remote PC**, which is the laptop that has been provided to you.
+
 **Reading the code.** You are encouraged to read the code of each program to understand how it works. You are not required to change any code, except for the changes that this guide asks you to make.
 
 **Getting help.** The Doctoral Instructor Assistant can be contacted only by email at vsj23@txstate.edu. Please do not contact the instructor with questions about the assignments.
@@ -62,7 +64,7 @@ A Docker container is a self-contained environment that holds a program together
 
 **What you will learn:** You will learn how to start the Docker container that holds all of the software for this assignment. This is the same container that you built in Assignment 1. It already contains Whisper, LLaMa, and eSpeak, so you do not need to install anything.
 
-Please perform this step on the **Remote PC**, which is your laptop. Please open an ordinary terminal (not one inside Docker) and run the three commands below, one after the other.
+Please perform this step on the **Remote PC**, which is the laptop that has been provided to you. Please open an ordinary terminal (not one inside Docker) and run the three commands below, one after the other.
 
 The first command allows the container to open windows on your laptop's screen. Please copy and paste the following command and run it:
 
