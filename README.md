@@ -98,6 +98,8 @@ If you ever see your normal username at the beginning of the line instead, you a
 
 **What you will learn:** You will learn that a trained AI model is stored as a large file. The two LLaMa models used in this assignment are about 4 GB each. Whisper does not need to be downloaded now, because it downloads its own model automatically the first time that you use it in Step 6.
 
+**Network required: the regular WiFi with internet access.** This step downloads files from GitHub and Hugging Face, which does not work on `small_blue_wifi`. Please connect the Remote PC (your laptop) to the regular WiFi before you start. This assignment does not use the robot, so you do not need `small_blue_wifi` in any step.
+
 Please perform this step on the **Remote PC**. Please open a **new ordinary terminal** (not inside Docker). The software is already installed in your container, but the two LLaMa model files are not part of any earlier assignment, so you must download them. This takes several minutes.
 
 The following two lines go to the folder that your laptop shares with the Docker container and download the assignment repository from GitHub. Please copy and paste them and run them:
@@ -199,7 +201,7 @@ Please read the following page: <https://openai.com/index/whisper/>
 
 **What you will learn:** You will see the listening part and the speaking part of the system working together. Whisper turns your voice into text, and eSpeak reads the text back to you.
 
-Please perform this step inside the **Docker container on the Remote PC**. The following two lines go to the demonstration folder and start the test program. The program records 5 seconds of audio from your microphone, so please say one short sentence as soon as it says "Speak now". The first run is slow, because Whisper downloads its model. Please copy and paste them and run them:
+Please perform this step inside the **Docker container on the Remote PC**. The following two lines go to the demonstration folder and start the test program. The program records 5 seconds of audio from your microphone, so please say one short sentence as soon as it says "Speak now". The first run is slow, because Whisper downloads its model, so the laptop must still be connected to the regular WiFi (the internet) for this first run. Please copy and paste them and run them:
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
