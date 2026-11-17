@@ -6,19 +6,19 @@
 
 ## Introduction
 
-In this assignment, you will build a system that listens to your voice, thinks about what you said, and speaks an answer back to you. This is the kind of system that would let a person give spoken instructions to a robot. Three programs work together to make this possible.
+This assignment shows how a robot could understand spoken instructions. You will build a system that listens to your voice and turns it into text, uses a large language model to write an answer, and then speaks the answer out loud. Three programs work together to do this.
 
 | Tool | What it does |
 | --- | --- |
-| **Whisper** | It listens to your voice and turns it into written text. |
-| **LLaMa** | It is a large language model that reads the text and writes an answer. |
-| **eSpeak** | It reads the answer out loud. |
+| **Whisper** | It listens to your voice and turns it into written text (speech-to-text). |
+| **LLaMa** | It is a large language model. It reads the text and writes an answer. |
+| **eSpeak** | It reads the answer out loud (text-to-speech). |
 
-You are not required to write any code. You will run programs, change a small number of settings and prompts, and observe what happens.
+You are not required to write any code. You will run the provided programs, change a small number of settings and prompts, and observe how the results change.
 
-**How to use this guide.** Please complete the steps in order, one at a time. Each step begins with a short statement of what you will learn. Each command is followed by an example of the output that you should see, so that you can compare it with your own screen. Small differences, such as numbers, timestamps, and the exact words of the language model's answers, are normal.
+**How to use this guide.** Please complete the steps in the order given. Each step begins with what you will learn. After each command, we show an example of the output that you should see, so that you can check your own results. Small differences, such as numbers, timestamps, and the exact words of the language model's answers, are normal.
 
-**Reading the code.** You are encouraged to open the Python files and read the code to understand how each program works. You are not required to change any code, except for the specific changes that this guide asks you to make.
+**Reading the code.** You are encouraged to read the code of each program to understand how it works. You are not required to change any code, except for the changes that this guide asks you to make.
 
 **Getting help.** The Doctoral Instructor Assistant can be contacted only by email at vsj23@txstate.edu. Please do not contact the instructor with questions about the assignments.
 
@@ -50,39 +50,39 @@ You will submit **three video clips**. Every step that requires a recording is m
 
 ## Step 1: Watch a Video About Docker
 
-**What you will learn:** You will learn what a Docker container is. This step is optional, because you already studied Docker in Assignment 1. Please skip it if you remember the idea.
+**What you will learn:** This step is a short reminder of what a Docker container is, which you studied in Assignment 1. The step is optional, and you may skip it if you already understand Docker.
 
 Please watch the following video if you would like a short reminder: <https://www.youtube.com/watch?v=Gjnup-PuquQ>
 
-A Docker container is like a small, separate computer that runs inside your laptop. All of the software for this assignment is installed inside it, so you will type most of the commands inside the container.
+A Docker container is a self-contained environment that holds a program together with all of the software that it depends on. Because everything is packaged together, the program runs in the same way on every computer. All of the software for this assignment is already installed inside such a container, so most commands are entered inside it.
 
 ---
 
 ## Step 2: Open the Docker Container
 
-**What you will learn:** You will learn how to open the Docker container that contains all of the software for this assignment. This is the same container that you built in Assignment 1. It already includes Whisper, LLaMa, and eSpeak, so you do not need to install anything.
+**What you will learn:** You will learn how to start the Docker container that holds all of the software for this assignment. This is the same container that you built in Assignment 1. It already contains Whisper, LLaMa, and eSpeak, so you do not need to install anything.
 
 Please perform this step on the **Remote PC**, which is your laptop. Please open an ordinary terminal (not one inside Docker) and run the three commands below, one after the other.
 
-The first command allows windows that open inside the container to appear on your laptop's screen. Please copy and paste the following command and run it:
+The first command allows the container to open windows on your laptop's screen. Please copy and paste the following command and run it:
 
 ```bash
 xhost +local:root
 ```
 
-The second command starts the container in the background. It tells Docker your user number and your home folder, which the container needs in order to use your microphone and speakers. If the container is already running, running this command again does no harm. Please copy and paste the following command and run it:
+The second command starts the container in the background. It gives Docker your user ID and your home folder, which the container needs in order to use your microphone and speakers. If the container is already running, running this command again does no harm. Please copy and paste the following command and run it:
 
 ```bash
 cd ~/turtlebot_docker && HOST_UID=$(id -u) USER_HOME=$HOME docker compose up -d
 ```
 
-The third command opens a terminal inside the container. This is where you will type most of the commands in the rest of this guide. Please copy and paste the following command and run it:
+The third command opens a terminal inside the container. You will type most of the remaining commands in this guide there. Please copy and paste the following command and run it:
 
 ```bash
 docker exec -it remote_pc_humble bash
 ```
 
-Then you will see something like this. The `root@` at the beginning of the line means that you are now inside the container:
+Then you will see something like this. The `root@` at the beginning of the line shows that you are now inside the container:
 
 ```text
 root@your-laptop-name:~#
@@ -94,11 +94,11 @@ If you ever see your normal username at the beginning of the line instead, you a
 
 ## Step 3: Download the Assignment Files and the Language Models
 
-**What you will learn:** You will learn that an artificial intelligence model is simply a large file. The two LLaMa models used in this assignment are about 4 GB each. Whisper does not need to be downloaded now, because it downloads its own model automatically the first time that you use it in Step 6.
+**What you will learn:** You will learn that a trained AI model is stored as a large file. The two LLaMa models used in this assignment are about 4 GB each. Whisper does not need to be downloaded now, because it downloads its own model automatically the first time that you use it in Step 6.
 
-Please perform this step on the **Remote PC**. Please open a **new ordinary terminal** (not inside Docker). The programs are already installed in your container, but the two LLaMa model files are not part of any earlier assignment, so you must download them. This takes several minutes.
+Please perform this step on the **Remote PC**. Please open a **new ordinary terminal** (not inside Docker). The software is already installed in your container, but the two LLaMa model files are not part of any earlier assignment, so you must download them. This takes several minutes.
 
-The following two lines move into the folder that Docker shares with your laptop and download the assignment repository from GitHub. Please copy and paste them and run them:
+The following two lines go to the folder that your laptop shares with the Docker container and download the assignment repository from GitHub. Please copy and paste them and run them:
 
 ```bash
 cd ~/turtlebot_docker/my_code
@@ -113,13 +113,13 @@ remote: Enumerating objects: 30, done.
 Receiving objects: 100% (30/30), done.
 ```
 
-The following command moves into the folder where the models must be stored. Please copy and paste it and run it:
+The following command goes to the folder where the models must be stored. Please copy and paste it and run it:
 
 ```bash
 cd Robotics_Assignment_5/Assignment_5_demo
 ```
 
-The following two commands download the two LLaMa models from the Hugging Face website. The option `-c` lets the download continue from where it stopped if your connection is interrupted. No account or access token is needed. Please copy and paste each command and run it:
+The following two commands download the two LLaMa models, which are stored in a file format called GGUF, from the Hugging Face website. The option `-c` lets an interrupted download continue where it stopped. No account or access token is needed. Please copy and paste each command and run it:
 
 ```bash
 wget -c https://huggingface.co/TheBloke/Llama-2-7B-32K-Instruct-GGUF/resolve/main/llama-2-7b-32k-instruct.Q4_K_M.gguf
@@ -136,7 +136,7 @@ llama-2-7b-32k-instruct.Q4_K_M.gguf   100%[===================>]   3.8G  25.1MB/
 llama-2-7b-chat.Q4_K_M.gguf           100%[===================>]   3.8G  24.8MB/s    in 2m 32s
 ```
 
-Finally, the following command lists the files in the folder so that you can confirm that both models are present. Please copy and paste it and run it:
+Finally, the following command lists the files in the folder so that you can check that both models are present. Please copy and paste it and run it:
 
 ```bash
 ls
@@ -153,7 +153,7 @@ llama-2-7b-chat.Q4_K_M.gguf           test_llama_text_system.py   test_whisper.p
 
 ## Step 4: Open Two Monitoring Windows
 
-**What you will learn:** You will learn how to check how much of the computer's memory a model is using. The graphics card (GPU) of your laptop has only 8 GB of memory. If a program tries to use more than that, it will crash, so you should watch these windows whenever a model is loading.
+**What you will learn:** You will learn how to see how much memory a model is using. The graphics chip (GPU) of your laptop has only 8 GB of its own memory (called VRAM). A program that needs more than that will crash, so you should watch these windows whenever a model is loading.
 
 Please perform this step on the **Remote PC**. Please open two new terminals. In each one, please enter the container by copying and pasting the following command and running it. This is the same command as in Step 2:
 
@@ -161,13 +161,13 @@ Please perform this step on the **Remote PC**. Please open two new terminals. In
 docker exec -it remote_pc_humble bash
 ```
 
-In the first container terminal, please run the following command. It shows how busy the processor is and how much of the computer's main memory is in use. Please leave it running:
+In the first container terminal, please run the following command. It shows how busy the processor is and how much of the computer's main memory (RAM) is in use. Please leave it running:
 
 ```bash
 top
 ```
 
-In the second container terminal, please run the following command. It shows how much of the GPU memory is in use. Please leave it running:
+In the second container terminal, please run the following command. It shows how busy the GPU is and how much of its memory is in use. Please leave it running:
 
 ```bash
 nvidia-smi
@@ -187,7 +187,7 @@ If the first number gets close to the total, the program may crash. Please keep 
 
 ## Step 5: Read About Whisper
 
-**What you will learn:** You will learn what Whisper is. Whisper is a program that was trained on a very large amount of recorded speech, so it can listen to audio and write down the words that were spoken.
+**What you will learn:** You will learn what Whisper is. Whisper is a speech recognition program that was trained on a very large collection of recorded speech, so it can listen to audio and write down the words that were spoken.
 
 Please read the following page: <https://openai.com/index/whisper/>
 
@@ -195,9 +195,9 @@ Please read the following page: <https://openai.com/index/whisper/>
 
 ## Step 6: Try Whisper and eSpeak Together
 
-**What you will learn:** You will see the "ears" and the "mouth" of your system working together. Whisper turns your voice into text, and eSpeak reads the text back to you.
+**What you will learn:** You will see the listening part and the speaking part of the system working together. Whisper turns your voice into text, and eSpeak reads the text back to you.
 
-Please perform this step inside the **Docker container on the Remote PC**. The following two lines move into the demonstration folder and start the test program. The program records 5 seconds of audio from your microphone, so please say one short sentence as soon as it says "Speak now". The first run is slow, because Whisper downloads its model. Please copy and paste them and run them:
+Please perform this step inside the **Docker container on the Remote PC**. The following two lines go to the demonstration folder and start the test program. The program records 5 seconds of audio from your microphone, so please say one short sentence as soon as it says "Speak now". The first run is slow, because Whisper downloads its model. Please copy and paste them and run them:
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
@@ -227,18 +227,18 @@ You should also hear the computer repeat your sentence in a robot voice. You are
 
 ## Step 7: Try a Different Whisper Size
 
-**What you will learn:** You will learn that bigger models are usually more accurate but slower and use more memory. Choosing a model is always a trade-off. This step is optional, and you may skip it if you are short on time.
+**What you will learn:** You will learn that bigger models are usually more accurate but slower and use more memory, so choosing a model is always a trade-off. This step is optional, and you may skip it if you are short on time.
 
 Please perform this step inside the **Docker container on the Remote PC**. Whisper comes in several sizes. The following table shows the approximate GPU memory that each size needs. Your laptop has 8 GB, so all of these sizes fit, but you should still watch `nvidia-smi`.
 
 | Model | Approximate GPU memory | Description |
 | --- | --- | --- |
-| `tiny` | 0.15 GB | This is the fastest model, but it may mishear some words. |
+| `tiny` | 0.15 GB | This is the fastest model, but it makes more mistakes. |
 | `base` | 0.2 GB | This is the default size in the test program. |
 | `small` | 0.6 GB | This model is a good balance between speed and accuracy. |
 | `medium` | 1.5 GB | This model is slower, but it is usually more accurate. |
 
-The following command opens the test program in the `nano` editor, which lets you change the file directly in the terminal. After you make your change, please press `Ctrl+O` and then `Enter` to save, and then `Ctrl+X` to leave the editor. Please copy and paste it and run it:
+The following command opens the test program in `nano`, a text editor that works inside the terminal. After you make your change, please press `Ctrl+O` and then `Enter` to save, and then `Ctrl+X` to leave the editor. Please copy and paste it and run it:
 
 ```bash
 nano test_whisper.py
@@ -262,7 +262,7 @@ Then you will see the same kind of output as in Step 6. The bigger the model is,
 
 ## Step 8: Read About Large Language Models
 
-**What you will learn:** You will learn what a large language model (LLM) is. An LLM is a program that is very good at predicting the next word in a text. This one skill allows it to answer questions and follow instructions.
+**What you will learn:** You will learn the basic idea of a large language model (LLM). An LLM is a program that has learned to predict the next word in a text, again and again. This one skill allows it to answer questions and follow instructions.
 
 Please read the following article: <https://mark-riedl.medium.com/a-very-gentle-introduction-to-large-language-models-without-the-hype-5f67941fa59e>
 
@@ -270,7 +270,7 @@ Please read the following article: <https://mark-riedl.medium.com/a-very-gentle-
 
 ## Step 9: Chat with the Instruct Model
 
-**What you will learn:** You will learn that the "instruct" model is trained to follow instructions, which means that you give it a task and it carries out the task.
+**What you will learn:** You will learn that the "instruct" model is trained to follow instructions: you give it a task, and it tries to carry out the task.
 
 Please perform this step inside the **Docker container on the Remote PC**. The following command starts a text conversation with the instruct model. The model takes about a minute to load the first time. Please copy and paste the command and run it:
 
@@ -294,13 +294,13 @@ Large Language Model: Forward kinematics finds the position of the robot's hand 
 the angle of every joint. Inverse kinematics does the opposite: ...
 ```
 
-Please also look at the `nvidia-smi` window. The GPU memory in use should have increased by about 4 GB, because the model is now loaded.
+Please also look at the `nvidia-smi` window. The GPU memory in use should have increased by about 4 GB, because the model is now loaded into GPU memory.
 
 ---
 
 ## Step 10: Chat with the Chat Model
 
-**What you will learn:** You will learn that the "chat" model is trained for friendly, back-and-forth conversation. Please compare its answer with the answer from the instruct model. Which one is longer, friendlier, or more to the point?
+**What you will learn:** You will learn that the "chat" model is trained for friendly, back-and-forth conversation. Please compare its answer with the answer of the instruct model. Which one is longer, friendlier, or more to the point?
 
 Please perform this step inside the **Docker container on the Remote PC**. Please open `test_llama_text.py` in the `nano` editor, using the same saving method as in Step 7. Please copy and paste the following command and run it:
 
@@ -327,7 +327,7 @@ Then you will see the same kind of output as in Step 9, but the wording and the 
 
 ## Step 11: Give the Model a System Prompt
 
-**What you will learn:** You will learn that a system prompt is an instruction that you give to the model before your question, for example "You are a robotics teacher". A system prompt changes how the model behaves without changing the question. This is how we will later make the model act as the brain of a robot.
+**What you will learn:** You will learn what a system prompt is. A system prompt is an instruction that you give to the model before your question, for example "You are a robotics teacher". It changes how the model answers without changing your question. Later, you will use this idea to make the model act as the brain of a robot.
 
 Please perform this step inside the **Docker container on the Remote PC**. The following command starts a conversation in which a system prompt is used. Please copy and paste it and run it, and then ask the same question as in Step 9:
 
@@ -360,7 +360,7 @@ You will notice that the style of the answer changes.
 
 ## Step 12: Compare Three Ways of Asking
 
-**What you will learn:** You will learn that how you ask a question matters as much as what you ask. You will compare three techniques: zero-shot prompting (no examples), few-shot prompting (a few examples), and chain-of-thought prompting (asking the model to reason step by step). Few-shot prompts usually make the answer neater.
+**What you will learn:** You will learn that the way you word a question matters as much as the question itself. You will compare three ways of asking: zero-shot (no examples), few-shot (a few examples), and chain-of-thought (asking the model to reason step by step). Few-shot prompts usually give neater and more consistent answers.
 
 Please perform this step inside the **Docker container on the Remote PC**. Please open `test_llama_text_system.py` with the same `nano` command as in Step 11, and replace the system prompt text (as in Step 11) with the following robot prompt. This prompt tells the model to behave as the reasoning engine of a robot and to answer only with a list of allowed actions:
 
@@ -412,7 +412,7 @@ If you see an error that says that the prompt is too long, please complete Step 
 
 ## Step 13: See How Much the Model Can Remember
 
-**What you will learn:** You will learn that a model can only read a limited amount of text at one time. This limit is called the **context window**, and it is measured in tokens, which are small pieces of words. A bigger context window lets the model read longer prompts, but it uses more GPU memory, and if it is too big the program crashes.
+**What you will learn:** You will learn that a model can only read a limited amount of text at one time. This limit is called the **context window**, and it is measured in tokens, which are small pieces of words. A larger context window lets the model read longer prompts, but it uses more GPU memory, and if it is too large the program crashes.
 
 Please perform this step inside the **Docker container on the Remote PC**. Please open `test_llama_text_system.py` with the following command:
 
@@ -432,7 +432,7 @@ The value 512 is a tested and safe setting. Please raise it one step at a time t
 python3 test_llama_text_system.py
 ```
 
-Then you will see that the GPU memory in use in `nvidia-smi` increases a little each time. If the program crashes or reports that memory has run out, the number is too big. In that case, please go back to the last value that worked and write it down. With the original value of 512, a prompt that is too long produces an error like this:
+Then you will see that the GPU memory in use in `nvidia-smi` increases a little each time. If the program crashes or reports that memory has run out, the value is too large. In that case, please go back to the last value that worked and write it down. With the original value of 512, a prompt that is too long produces an error like this:
 
 ```text
 ValueError: Requested tokens (631) exceed context window of 512
@@ -468,9 +468,9 @@ While you demonstrate the tests, please answer the following four questions alou
 
 ## Step 15: Have a Voice Conversation Without ROS
 
-**What you will learn:** You will learn how the three tools are joined into one talking assistant. In the next steps, you will repeat the same idea in the way that a real robot works, with separate programs that send messages to each other.
+**What you will learn:** You will learn how the three tools are joined into one talking assistant in a single program. In the next steps, you will build the same assistant in the way that a real robot works, with separate programs that send messages to each other.
 
-Please perform this step inside the **Docker container on the Remote PC**. The following two lines move into the demonstration folder and start a voice conversation with the model. Please copy and paste them and run them. When the program shows its prompt, please either type a question or wait 5 seconds, after which it records your voice for 5 seconds:
+Please perform this step inside the **Docker container on the Remote PC**. The following two lines go to the demonstration folder and start a voice conversation with the model. Please copy and paste them and run them. When the program shows its prompt, please either type a question or wait 5 seconds, after which it records your voice for 5 seconds:
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/Assignment_5_demo
@@ -496,9 +496,9 @@ Large Language Model: Robotics is the study of machines that ...
 
 ## Step 16: Start the Server
 
-**What you will learn:** You will learn that a server is a program that waits and does the heavy work whenever another program asks it to. This server loads Whisper, LLaMa, and eSpeak into memory and waits for requests.
+**What you will learn:** You will learn what a server is. A server is a program that waits for requests and does the heavy work whenever another program asks it to. This server loads Whisper and LLaMa into GPU memory, prepares eSpeak, and then waits for requests.
 
-Please perform this step inside the **Docker container on the Remote PC**. Please close all other programs first by typing `exit` or pressing `Ctrl+C` in their windows, so that there is enough memory. The following two lines move into the assignment folder and start the server. Please copy and paste them and run them:
+Please perform this step inside the **Docker container on the Remote PC**. Please close all other programs first by typing `exit` or pressing `Ctrl+C` in their windows, so that there is enough memory. The following two lines go to the assignment folder and start the server. Please copy and paste them and run them:
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/
@@ -521,7 +521,7 @@ You are encouraged to open `sample_code_servers.py` and read it. You are not req
 
 ## Step 17: Start the Client
 
-**What you will learn:** You will learn that the client and the server are two separate programs that talk to each other using ROS 2 messages, in the same way that the parts of a real robot do. The client works like a remote control for the server.
+**What you will learn:** You will learn that the client and the server are two separate programs that talk to each other using ROS 2 messages, in the same way as the parts of a real robot. The client works like a remote control for the server.
 
 Please perform this step on the **Remote PC**. Please open a **new ordinary terminal** and keep the server running. The first command opens a terminal inside the container. Please copy and paste it and run it:
 
@@ -529,7 +529,7 @@ Please perform this step on the **Remote PC**. Please open a **new ordinary term
 docker exec -it remote_pc_humble bash
 ```
 
-The following two lines then move into the assignment folder and start the client. Please copy and paste them and run them:
+The following two lines then go to the assignment folder and start the client. Please copy and paste them and run them:
 
 ```bash
 cd ~/my_code/Robotics_Assignment_5/
@@ -556,7 +556,7 @@ You are encouraged to open `sample_code_clients.py` and read it. You are not req
 
 ## Step 18: Try Menu Options 1, 2, and 3
 
-**What you will learn:** You will learn that each option asks the server to do one job: to speak, to listen, or to think.
+**What you will learn:** You will learn that each menu option asks the server to do one job: to speak, to listen, or to write an answer.
 
 Please perform this step in the client terminal. Please try the three options one at a time.
 
@@ -613,7 +613,7 @@ At the same time, you will see the matching lines in the server window, somethin
 
 ## Step 19: Try Option 4, the Full Conversation
 
-**What you will learn:** You will see the whole pipeline working together: your voice is heard by Whisper (the ears), understood by LLaMa (the brain), and answered by eSpeak (the mouth). At this point, you can talk to a computer.
+**What you will learn:** You will see the whole pipeline working together: your voice is transcribed by Whisper, understood and answered by LLaMa, and spoken by eSpeak. At this point, you have a working system that you can talk to.
 
 Please perform this step in the client terminal. Please type `4` and press `Enter`, then type `5` for the recording duration, and then please say one sentence. Please do not touch the keyboard after that.
 
@@ -634,7 +634,7 @@ Reply sent to eSpeak. Listen for the audio.
 
 ## Step 20: Change the Server's Settings
 
-**What you will learn:** You will learn that you can change the behavior of an artificial intelligence system just by changing a few numbers and sentences.
+**What you will learn:** You will learn that you can change how an AI system behaves just by changing a few numbers and sentences.
 
 Please perform this step inside the **Docker container on the Remote PC**. First, please stop the server by pressing `Ctrl+C` in its terminal. Then please open the server file in the `nano` editor, using the same saving method as in Step 7. Please copy and paste the following command and run it:
 
@@ -649,7 +649,7 @@ Near the top of the file, there is a block that starts with `# Settings you can 
 | `MODEL_PATH` | Please switch between the instruct model and the chat model. | The style of the answer changes. |
 | `WHISPER_MODEL` | Please try `"tiny"` or `"medium"`. | The speed and the accuracy of the listening change. |
 | `SYSTEM_PROMPT` | Please use the robot teacher prompt from Step 11. | The tone of the answer changes. |
-| `TEMPERATURE` | Please try `0.1` and then `1.0`. | A low value gives steady and repeatable answers, and a high value gives more random answers. |
+| `TEMPERATURE` | Please try `0.1` and then `1.0`. | A low value gives steady and repeatable answers, and a high value gives more varied answers. |
 | `MAX_TOKENS` | Please try `32` and then `256`. | The length of the answer changes, and short values may cut the answer off. |
 | `N_CTX` | Please raise it in steps of 512. | Longer prompts fit, but the memory use rises. |
 
@@ -661,7 +661,7 @@ Then you will see the same menu and the same kind of output as in Step 19, with 
 
 **Recording required:** Please record this step as one continuous video without editing. Please name the clip `Assignment5_Group<number>_Clip2`, for example `Assignment5_Group2_Clip2`.
 
-**What you will learn:** You do not need to understand every line of the code. The goal is to understand the big picture: a request goes in, the work is done, and an answer comes out.
+**What you will learn:** You are not required to understand every line of the code. The goal is to understand the big picture: a request comes in, the work is done, and an answer is sent back.
 
 Please film the computer screen with a phone or a camera, while one team member narrates. Please open the two code files on the screen with the following command, which opens the server file. You can open the client file in the same way by replacing `servers` with `clients`:
 
@@ -681,7 +681,7 @@ Please point at the code and explain the following three topics in your own word
 
 **Recording required:** Please record this step as one continuous video without editing. Please name the clip `Assignment5_Group<number>_Clip3`, for example `Assignment5_Group2_Clip3`.
 
-**What you will learn:** You will show a working natural-language pipeline from beginning to end.
+**What you will learn:** You will show a working system from beginning to end.
 
 Please film the computer screen and the speaker with a phone or a camera, so that the sound is clear, while one team member narrates. Please start the server and the client with the commands from Step 16 and Step 17, and show both windows on the screen. For convenience, the commands are repeated here. Please run the first block in the server terminal, and the second block in the client terminal:
 
